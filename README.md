@@ -112,6 +112,11 @@ npm install
 cp .env.example .env
 # Edite o arquivo .env com suas configurações
 
+> **Importante:**  
+> Nunca faça commit do arquivo `.env` original!  
+> Use sempre `.env.example` como referência no repositório, mantendo os dados sensíveis apenas localmente.
+> Se cometer por engano, use `git rm --cached .env` e verifique se `.env` está listado no `.gitignore`.
+
 # 4. Certifique-se de que o MongoDB está rodando
 # Se instalado localmente:
 sudo systemctl start mongod
@@ -127,6 +132,12 @@ npm run dev
 ```
 
 A API estará disponível em **http://localhost:3000**
+
+> Com `docker-compose up -d`, sobem os serviços API, MongoDB e Mongo Express juntos.  
+Mongo Express pode ser acessado via [http://localhost:8081](http://localhost:8081), usando:
+- Usuário: admin
+- Senha: password123
+
 
 ---
 
@@ -304,7 +315,12 @@ curl -X POST http://localhost:3000/api/products \
 
 # 4. Listar produtos
 curl http://localhost:3000/api/products
-```
+
+
+## 📚 Documentação Interativa Swagger
+
+Abra no navegador: [http://localhost:3000/api-docs](http://localhost:3000/api-docs)  
+Aqui você pode testar todos os endpoints da API de forma interativa!
 
 ---
 
@@ -346,3 +362,29 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ## 🙏 Agradecimentos
 
 Obrigado pela oportunidade de participar deste desafio técnico. O projeto foi desenvolvido com dedicação e seguindo as melhores práticas de desenvolvimento de software.
+
+## ❓ Solução de Problemas / FAQ
+
+### Erro: Porta já está em uso
+A porta 3000 ou 27017 pode estar ocupada. Finalize processos:
+
+### lsof -i :3000
+### kill <PID>
+
+text
+Ou altere `PORT` no `.env`.
+
+### Erro: MongoDB não está rodando
+Execute `docker-compose up -d` ou `sudo systemctl start mongod` se local.
+
+### Erro: Dependências faltando
+Rode `npm install` após clonar.
+
+### CORS
+Liberado para qualquer origem em dev, restrinja em produção (`src/index.ts`).
+
+### Conta/email já existe ao registrar
+Troque o email ou faça login.
+
+### `.env` no GitHub
+Remova do tracking (`git rm --cached .env`) e garanta `.env` no `.gitignore`.
