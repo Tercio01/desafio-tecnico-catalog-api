@@ -1,0 +1,146 @@
+graph TB
+    subgraph "Usuários - 100k Simultâneos"
+        Users[👥 100.000 Usuários<br/>Web/Mobile/API Clients]
+    end
+
+    subgraph "AWS - Camada de Entrada"
+        Route53[🌐 Route 53<br/>DNS + Health Checks]
+        CloudFront[📦 CloudFront CDN<br/>Cache Global + DDoS Protection]
+        WAF[🛡️ AWS WAF<br/>Web Application Firewall]
+    end
+
+    subgraph "AWS - Load Balancing"
+        ALB[⚖️ Application Load Balancer<br/>Layer 7 Load Balancing<br/>Auto Scaling Integration]
+    end
+
+    subgraph "AWS - Microsserviços em ECS/EKS"
+        subgraph "Product Service"
+            ProductMS1[🛍️ Product Service 1<br/>Node.js + Express<br/>Fargate/EKS Pod]
+            ProductMS2[🛍️ Product Service 2<br/>Node.js + Express<br/>Fargate/EKS Pod]
+            ProductMSN[🛍️ Product Service N<br/>Auto Scaling]
+        end
+        
+        subgraph "Auth Service"
+            AuthMS1[🔐 Auth Service 1<br/>JWT + OAuth2<br/>Fargate/EKS Pod]
+            AuthMS2[🔐 Auth Service 2<br/>Fargate/EKS Pod]
+        end
+        
+        subgraph "Search Service"
+            SearchMS[🔍 Search Service<br/>ElasticSearch Integration<br/>Fargate/EKS Pod]
+        end
+        
+        subgraph "Analytics Service"
+            AnalyticsMS[📊 Analytics Service<br/>Event Processing<br/>Fargate/EKS Pod]
+        end
+    end
+
+    subgraph "AWS - Cache Layer"
+        ElastiCache[💾 ElastiCache Redis<br/>Multi-AZ Cluster<br/>Session Store + Data Cache]
+    end
+
+    subgraph "AWS - Message Queue"
+        SQS[📬 Amazon SQS<br/>Decoupling Services]
+        SNS[📢 Amazon SNS<br/>Pub/Sub Events]
+    end
+
+    subgraph "AWS - Database Layer - Multi-AZ"
+        subgraph "Primary Database"
+            RDS1[(🗄️ RDS PostgreSQL<br/>Primary - AZ-1<br/>Auto Backup)]
+        end
+        subgraph "Read Replicas"
+            RDS2[(🗄️ RDS Read Replica<br/>AZ-2)]
+            RDS3[(🗄️ RDS Read Replica<br/>AZ-3)]
+        end
+        subgraph "NoSQL - High Performance"
+            DynamoDB[(⚡ DynamoDB<br/>Global Tables<br/>Auto Scaling)]
+        end
+    end
+
+    subgraph "AWS - Search & Analytics"
+        OpenSearch[🔎 OpenSearch<br/>Full-Text Search<br/>Product Catalog]
+        Kinesis[📊 Kinesis Data Streams<br/>Real-time Analytics]
+    end
+
+    subgraph "AWS - Storage"
+        S3[📁 S3 Bucket<br/>Product Images<br/>Static Assets]
+    end
+
+    subgraph "AWS - Monitoring & Observability"
+        CloudWatch[📈 CloudWatch<br/>Metrics + Logs + Alarms]
+        XRay[🔍 X-Ray<br/>Distributed Tracing]
+    end
+
+    subgraph "AWS - Security & Secrets"
+        SecretsManager[🔒 Secrets Manager<br/>API Keys + DB Credentials]
+        IAM[👤 IAM Roles<br/>Service Authentication]
+    end
+
+    Users --> Route53
+    Route53 --> CloudFront
+    CloudFront --> WAF
+    WAF --> ALB
+    
+    ALB --> ProductMS1
+    ALB --> ProductMS2
+    ALB --> ProductMSN
+    ALB --> AuthMS1
+    ALB --> AuthMS2
+    ALB --> SearchMS
+    
+    ProductMS1 --> ElastiCache
+    ProductMS2 --> ElastiCache
+    ProductMSN --> ElastiCache
+    
+    ProductMS1 --> RDS1
+    ProductMS2 --> RDS2
+    ProductMSN --> RDS3
+    
+    ProductMS1 --> DynamoDB
+    ProductMS2 --> DynamoDB
+    
+    AuthMS1 --> ElastiCache
+    AuthMS2 --> ElastiCache
+    AuthMS1 --> RDS1
+    
+    SearchMS --> OpenSearch
+    SearchMS --> ElastiCache
+    
+    ProductMS1 --> SQS
+    ProductMS2 --> SQS
+    SQS --> AnalyticsMS
+    
+    AnalyticsMS --> Kinesis
+    AnalyticsMS --> SNS
+    
+    ProductMS1 --> S3
+    ProductMS2 --> S3
+    
+    RDS1 -.->|Replication| RDS2
+    RDS1 -.->|Replication| RDS3
+    
+    ProductMS1 --> CloudWatch
+    ProductMS2 --> CloudWatch
+    AuthMS1 --> CloudWatch
+    SearchMS --> CloudWatch
+    AnalyticsMS --> CloudWatch
+    
+    ProductMS1 --> XRay
+    ProductMS2 --> XRay
+    
+    ProductMS1 --> SecretsManager
+    AuthMS1 --> SecretsManager
+    
+    style Users fill:#e1f5ff
+    style CloudFront fill:#ff9800
+    style ALB fill:#9c27b0
+    style ProductMS1 fill:#4caf50
+    style ProductMS2 fill:#4caf50
+    style ProductMSN fill:#4caf50
+    style AuthMS1 fill:#2196f3
+    style AuthMS2 fill:#2196f3
+    style SearchMS fill:#00bcd4
+    style AnalyticsMS fill:#ff5722
+    style ElastiCache fill:#f44336
+    style RDS1 fill:#ffeb3b
+    style DynamoDB fill:#ffc107
+    style CloudWatch fill:#009688
