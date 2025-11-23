@@ -175,9 +175,9 @@ POST /api/auth/register
 Content-Type: application/json
 
 {
-  "name": "João Silva",
-  "email": "joao@example.com",
-  "password": "senha123",
+  "name": "Tercio Parente",
+  "email": "tercio1parente@gmail.com",
+  "password": "123456",
   "role": "admin"  // ou "user"
 }
 ```
