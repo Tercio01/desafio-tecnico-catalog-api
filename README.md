@@ -188,8 +188,8 @@ POST /api/auth/login
 Content-Type: application/json
 
 {
-  "email": "joao@example.com",
-  "password": "senha123"
+  "email": "tercio1parente@gmail.com",
+  "password": "123456"
 }
 ```
 
@@ -200,8 +200,8 @@ Content-Type: application/json
   "message": "Login realizado com sucesso",
   "data": {
     "id": "...",
-    "name": "João Silva",
-    "email": "joao@example.com",
+    "name": "Tercio Parente",
+    "email": "tercio1parente@gmail.com",
     "role": "admin"
   },
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -333,7 +333,7 @@ A solução completa da **Parte 2 do desafio** (Arquitetura para 100k usuários)
 **Tercio Alves Parente**
 
 - GitHub: [@Tercio01](https://github.com/Tercio01)
-- LinkedIn: [Tercio Alves Parente](https://www.linkedin.com/in/tercio-alves-parente/)
+- LinkedIn: [Tercio Alves Parente](www.linkedin.com/in/tercioparente)
 
 ---
 
