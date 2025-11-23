@@ -368,10 +368,9 @@ Obrigado pela oportunidade de participar deste desafio técnico. O projeto foi d
 ### Erro: Porta já está em uso
 A porta 3000 ou 27017 pode estar ocupada. Finalize processos:
 
-### lsof -i :3000
-### kill <PID>
+lsof -i :3000
+kill <PID>
 
-text
 Ou altere `PORT` no `.env`.
 
 ### Erro: MongoDB não está rodando
