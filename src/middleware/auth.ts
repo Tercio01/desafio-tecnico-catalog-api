@@ -1,0 +1,36 @@
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
+
+// Extend Express Request interface
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: string;
+    }
+  }
+}
+
+export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+
+    if (!token) {
+      res.status(401).json({
+        success: false,
+        message: 'Acesso negado. Token não fornecido.'
+      });
+      return;
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+    req.userId = decoded.userId;
+    next();
+  } catch (error) {
+    res.status(401).json({
+      success: false,
+      message: 'Token inválido'
+    });
+  }
+};

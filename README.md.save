@@ -1,0 +1,30 @@
+a) Solução de Problemas / FAQ
+
+No final do README:
+
+text
+## ❓ Solução de Problemas / FAQ
+
+### Erro: Porta já está em uso
+A porta 3000 ou 27017 pode estar ocupada. Finalize processos:
+
+lsof -i :3000
+kill <PID>
+
+text
+Ou altere `PORT` no `.env`.
+
+### Erro: MongoDB não está rodando
+Execute `docker-compose up -d` ou `sudo systemctl start mongod` se local.
+
+### Erro: Dependências faltando
+Rode `npm install` após clonar.
+
+### CORS
+Liberado para qualquer origem em dev, restrinja em produção (`src/index.ts`).
+
+### Conta/email já existe ao registrar
+Troque o email ou faça login.
+
+### `.env` no GitHub
+Remova do tracking (`git rm --cached .env`) e garanta `.env` no `.gitignore`.
