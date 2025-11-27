@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { register, login, getMe } from '../controllers/authController';
 import { authenticate } from '../middleware/auth';
+import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = Router();
 
@@ -36,7 +37,7 @@ const router = Router();
  *       500:
  *         description: Erro interno do servidor
  */
-router.post('/register', register);
+router.post('/register', asyncHandler(register));
 
 /**
  * @swagger
@@ -66,7 +67,7 @@ router.post('/register', register);
  *       500:
  *         description: Erro interno do servidor
  */
-router.post('/login', login);
+router.post('/login', asyncHandler(login));
 
 /**
  * @swagger
@@ -84,6 +85,6 @@ router.post('/login', login);
  *       404:
  *         description: Usuário não encontrado
  */
-router.get('/me', authenticate, getMe);
+router.get('/me', authenticate, asyncHandler(getMe));
 
 export default router;

@@ -16,11 +16,18 @@ declare global {
 
 // Gerar token JWT - CORRIGIDO
 const generateToken = (userId: string): string => {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
+  return jwt.sign(
+    { userId },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
+  );
 };
 
 // Registrar novo usuário
-export const register = async (req: Request, res: Response): Promise<void> => {
+export const register = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { name, email, password } = req.body;
 
@@ -55,10 +62,16 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error) {
+    console.error('❌ ERRO DETALHADO:', error);
+    console.error('Tipo de erro:', typeof error);
+    console.error(
+      'Stack:',
+      error instanceof Error ? error.stack : 'N/A'
+    );
     res.status(500).json({
       success: false,
       message: 'Erro ao registrar usuário',
-      error: error instanceof Error ? error.message : 'Erro desconhecido',
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 };
@@ -105,10 +118,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error) {
+    console.error('❌ ERRO DETALHADO:', error);
+    console.error('Tipo de erro:', typeof error);
+    console.error(
+      'Stack:',
+      error instanceof Error ? error.stack : 'N/A'
+    );
     res.status(500).json({
       success: false,
       message: 'Erro ao fazer login',
-      error: error instanceof Error ? error.message : 'Erro desconhecido',
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 };
@@ -131,10 +150,16 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       data: user,
     });
   } catch (error) {
+    console.error('❌ ERRO DETALHADO:', error);
+    console.error('Tipo de erro:', typeof error);
+    console.error(
+      'Stack:',
+      error instanceof Error ? error.stack : 'N/A'
+    );
     res.status(500).json({
       success: false,
       message: 'Erro ao buscar usuário',
-      error: error instanceof Error ? error.message : 'Erro desconhecido',
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 };

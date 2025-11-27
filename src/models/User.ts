@@ -41,18 +41,19 @@ const UserSchema: Schema = new Schema(
   }
 );
 
-UserSchema.pre('save', async function (next: any) {
-  if (!this.isModified('password')) return next();
+UserSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password as string, salt);
-    next();
   } catch (error: any) {
-    next(error);
+    throw error;
   }
 });
 
-UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+UserSchema.methods.comparePassword = async function (
+  candidatePassword: string
+): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
 

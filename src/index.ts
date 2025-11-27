@@ -1,3 +1,4 @@
+import { errorHandler } from './middleware/errorHandler';
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -58,6 +59,10 @@ app.use(
 // Rotas da API
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+
+// Middleware de erro (deve vir antes da rota 404 e depois das rotas)
+app.use(errorHandler);
+
 
 // Rota 404
 app.use((req: Request, res: Response) => {
