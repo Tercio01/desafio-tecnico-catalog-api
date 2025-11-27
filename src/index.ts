@@ -32,8 +32,8 @@ app.get('/', (req: Request, res: Response) => {
     endpoints: {
       auth: '/api/auth',
       products: '/api/products',
-      health: '/health'
-    }
+      health: '/health',
+    },
   });
 });
 
@@ -41,15 +41,19 @@ app.get('/health', (req: Request, res: Response) => {
   res.json({
     success: true,
     status: 'OK',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
 // Documentação Swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'Catalog API - Documentação',
-}));
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Catalog API - Documentação',
+  })
+);
 
 // Rotas da API
 app.use('/api/auth', authRoutes);
@@ -59,7 +63,7 @@ app.use('/api/products', productRoutes);
 app.use((req: Request, res: Response) => {
   res.status(404).json({
     success: false,
-    message: 'Rota não encontrada'
+    message: 'Rota não encontrada',
   });
 });
 
@@ -70,7 +74,7 @@ const PORT = process.env.PORT || 3000;
 const startServer = async () => {
   try {
     await connectDB();
-    
+
     app.listen(PORT, () => {
       logger.info(`🚀 Servidor rodando na porta ${PORT}`);
       logger.info(`📍 URL: http://localhost:${PORT}`);

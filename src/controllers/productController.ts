@@ -15,7 +15,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       price,
       category,
       sku,
-      stock
+      stock,
     });
 
     await product.save();
@@ -23,14 +23,14 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     res.status(201).json({
       success: true,
       message: 'Produto criado com sucesso',
-      data: product
+      data: product,
     });
   } catch (error: any) {
     console.error('❌ Erro em createProduct:', error.message);
     res.status(400).json({
       success: false,
       message: 'Dados de produto inválidos',
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -50,14 +50,12 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+        { description: { $regex: search, $options: 'i' } },
       ];
     }
 
     const skip = (Number(page) - 1) * Number(limit);
-    const products = await Product.find(filter)
-      .skip(skip)
-      .limit(Number(limit));
+    const products = await Product.find(filter).skip(skip).limit(Number(limit));
 
     const total = await Product.countDocuments(filter);
 
@@ -68,15 +66,15 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
         total,
         page: Number(page),
         limit: Number(limit),
-        pages: Math.ceil(total / Number(limit))
-      }
+        pages: Math.ceil(total / Number(limit)),
+      },
     });
   } catch (error: any) {
     console.error('❌ Erro em getProducts:', error.message);
     res.status(500).json({
       success: false,
       message: 'Erro ao buscar produtos',
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -85,36 +83,36 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
     console.log(`📝 GET /api/products/${req.params.id} chamado`);
-    
+
     // Validar se ID é um ObjectId válido
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       res.status(404).json({
         success: false,
-        message: 'Produto não encontrado'
+        message: 'Produto não encontrado',
       });
       return;
     }
 
     const product = await Product.findById(req.params.id);
-    
+
     if (!product) {
       res.status(404).json({
         success: false,
-        message: 'Produto não encontrado'
+        message: 'Produto não encontrado',
       });
       return;
     }
 
     res.json({
       success: true,
-      data: product
+      data: product,
     });
   } catch (error: any) {
     console.error('❌ Erro em getProductById:', error.message);
     res.status(500).json({
       success: false,
       message: 'Erro ao buscar produto',
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -126,21 +124,20 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       res.status(404).json({
         success: false,
-        message: 'Produto não encontrado'
+        message: 'Produto não encontrado',
       });
       return;
     }
 
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!product) {
       res.status(404).json({
         success: false,
-        message: 'Produto não encontrado'
+        message: 'Produto não encontrado',
       });
       return;
     }
@@ -148,14 +145,14 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     res.json({
       success: true,
       message: 'Produto atualizado com sucesso',
-      data: product
+      data: product,
     });
   } catch (error: any) {
     console.error('❌ Erro em updateProduct:', error.message);
     res.status(400).json({
       success: false,
       message: 'Erro ao atualizar produto',
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -167,7 +164,7 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       res.status(404).json({
         success: false,
-        message: 'Produto não encontrado'
+        message: 'Produto não encontrado',
       });
       return;
     }
@@ -177,7 +174,7 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     if (!product) {
       res.status(404).json({
         success: false,
-        message: 'Produto não encontrado'
+        message: 'Produto não encontrado',
       });
       return;
     }
@@ -185,14 +182,14 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     res.json({
       success: true,
       message: 'Produto deletado com sucesso',
-      data: product
+      data: product,
     });
   } catch (error: any) {
     console.error('❌ Erro em deleteProduct:', error.message);
     res.status(500).json({
       success: false,
       message: 'Erro ao deletar produto',
-      error: error.message
+      error: error.message,
     });
   }
 };

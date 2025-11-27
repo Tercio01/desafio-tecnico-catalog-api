@@ -4,7 +4,7 @@ import {
   getProductById,
   createProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
 } from '../controllers/productController';
 import { authenticate } from '../middleware/auth';
 

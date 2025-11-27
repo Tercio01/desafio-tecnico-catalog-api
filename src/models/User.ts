@@ -11,34 +11,37 @@ export interface IUser extends Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const UserSchema: Schema = new Schema({
-  name: {
-    type: String,
-    required: [true, 'Nome é obrigatório'],
-    trim: true
+const UserSchema: Schema = new Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'Nome é obrigatório'],
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: [true, 'Email é obrigatório'],
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      required: [true, 'Senha é obrigatória'],
+      minlength: [6, 'Senha deve ter no mínimo 6 caracteres'],
+    },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
+    },
   },
-  email: {
-    type: String,
-    required: [true, 'Email é obrigatório'],
-    unique: true,
-    lowercase: true,
-    trim: true
-  },
-  password: {
-    type: String,
-    required: [true, 'Senha é obrigatória'],
-    minlength: [6, 'Senha deve ter no mínimo 6 caracteres']
-  },
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
+  {
+    timestamps: true,
   }
-}, {
-  timestamps: true
-});
+);
 
-UserSchema.pre('save', async function(next: any) {
+UserSchema.pre('save', async function (next: any) {
   if (!this.isModified('password')) return next();
   try {
     const salt = await bcrypt.genSalt(12);
@@ -49,7 +52,7 @@ UserSchema.pre('save', async function(next: any) {
   }
 });
 
-UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
 

@@ -19,7 +19,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
     if (!token) {
       res.status(401).json({
         success: false,
-        message: 'Acesso negado. Token não fornecido.'
+        message: 'Acesso negado. Token não fornecido.',
       });
       return;
     }
@@ -30,7 +30,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
   } catch (error) {
     res.status(401).json({
       success: false,
-      message: 'Token inválido'
+      message: 'Token inválido',
     });
   }
 };

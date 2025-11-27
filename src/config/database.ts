@@ -7,9 +7,9 @@ dotenv.config();
 const connectDB = async (): Promise<void> => {
   try {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/catalogdb';
-    
+
     await mongoose.connect(mongoUri);
-    
+
     logger.info('✅ MongoDB conectado com sucesso!');
   } catch (error) {
     logger.error({ err: error }, '❌ Erro ao conectar ao MongoDB');
