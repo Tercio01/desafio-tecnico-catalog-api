@@ -38,20 +38,17 @@ const UserSchema: Schema = new Schema({
   timestamps: true
 });
 
-// Hash password antes de salvar
-UserSchema.pre('save', async function(next) {
+UserSchema.pre('save', async function(next: any) {
   if (!this.isModified('password')) return next();
-  
   try {
     const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
+    this.password = await bcrypt.hash(this.password as string, salt);
     next();
   } catch (error: any) {
     next(error);
   }
 });
 
-// Método para comparar password
 UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };

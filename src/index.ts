@@ -1,87 +1,93 @@
-import express from 'express';
+import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import pinoHttp from 'pino-http';
+import swaggerUi from 'swagger-ui-express';
 import connectDB from './config/database';
-import { setupSwagger } from './config/swagger';
-import authRoutes from './routes/authRoutes';
 import productRoutes from './routes/productRoutes';
+import authRoutes from './routes/authRoutes';
+import logger from './config/logger';
+import { swaggerSpec } from './config/swagger';
 
 // Carregar variáveis de ambiente
 dotenv.config();
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Conectar ao MongoDB
-connectDB();
+// Criar aplicação Express
+const app: Application = express();
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Configurar Swagger
-setupSwagger(app);
+// Logger HTTP
+app.use(pinoHttp({ logger }));
 
-// ===== ROTAS PÚBLICAS =====
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-
-console.log('✅ CRUD com autenticação configurado');
-
-// ===== OUTRAS ROTAS =====
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    database: 'Connected'
-  });
-});
-
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'API Catálogo de Produtos - Com Autenticação JWT e Swagger!',
-    timestamp: new Date().toISOString(),
+// Rotas
+app.get('/', (req: Request, res: Response) => {
+  res.json({
+    success: true,
+    message: '🚀 API Catálogo de Produtos - Funcionando!',
+    version: '1.0.0',
     endpoints: {
-      docs: 'GET /api-docs',
-      auth: {
-        register: 'POST /api/auth/register',
-        login: 'POST /api/auth/login',
-        me: 'GET /api/auth/me'
-      },
-      products: {
-        public: {
-          list: 'GET /api/products',
-          get: 'GET /api/products/:id'
-        },
-        protected: {
-          create: 'POST /api/products (Auth)',
-          update: 'PUT /api/products/:id (Auth)',
-          delete: 'DELETE /api/products/:id (Auth)'
-        }
-      },
-      health: 'GET /health'
+      auth: '/api/auth',
+      products: '/api/products',
+      health: '/health'
     }
   });
 });
 
-// Exportar app para testes
-export default app;
-
-// Iniciar servidor apenas se não estiver em modo de teste
-if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.log(`🚀 API com Autenticação JWT e Swagger rodando na porta ${PORT}`);
-    console.log('📍 Endpoints:');
-    console.log('   📚 Docs: http://localhost:3000/api-docs');
-    console.log('   🔐 Auth:');
-    console.log('      POST /api/auth/register');
-    console.log('      POST /api/auth/login');
-    console.log('      GET  /api/auth/me');
-    console.log('   📦 Products:');
-    console.log('      GET    /api/products (Public)');
-    console.log('      POST   /api/products (Auth)');
-    console.log('      GET    /api/products/:id (Public)');
-    console.log('      PUT    /api/products/:id (Auth)');
-    console.log('      DELETE /api/products/:id (Auth)');
+app.get('/health', (req: Request, res: Response) => {
+  res.json({
+    success: true,
+    status: 'OK',
+    timestamp: new Date().toISOString()
   });
-}
+});
+
+// Documentação Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Catalog API - Documentação',
+}));
+
+// Rotas da API
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+
+// Rota 404
+app.use((req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    message: 'Rota não encontrada'
+  });
+});
+
+// Porta
+const PORT = process.env.PORT || 3000;
+
+// Conectar ao banco e iniciar servidor
+const startServer = async () => {
+  try {
+    await connectDB();
+    
+    app.listen(PORT, () => {
+      logger.info(`🚀 Servidor rodando na porta ${PORT}`);
+      logger.info(`📍 URL: http://localhost:${PORT}`);
+      logger.info('📚 Endpoints disponíveis:');
+      logger.info('   - GET  / (Informações da API)');
+      logger.info('   - GET  /health (Health check)');
+      logger.info('   - POST /api/auth/register (Registrar usuário)');
+      logger.info('   - POST /api/auth/login (Login)');
+      logger.info('   - GET  /api/products (Listar produtos)');
+      logger.info('   - POST /api/products (Criar produto - Admin)');
+    });
+  } catch (error) {
+    logger.error({ err: error }, '❌ Erro ao iniciar servidor');
+    process.exit(1);
+  }
+};
+
+startServer();
+
+export default app;

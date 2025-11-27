@@ -5,30 +5,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const logger_1 = __importDefault(require("./logger"));
 dotenv_1.default.config();
-mongoose_1.default.set('strictQuery', false);
 const connectDB = async () => {
     try {
-        console.log('🔄 Tentando conectar ao MongoDB...');
-        console.log(`📡 URI: ${process.env.MONGODB_URI}`);
-        const conn = await mongoose_1.default.connect(process.env.MONGODB_URI, {
-            serverSelectionTimeoutMS: 5000,
-            socketTimeoutMS: 45000,
-        });
-        console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-        console.log(`📊 Database: ${conn.connection.name}`);
+        const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/catalogdb';
+        await mongoose_1.default.connect(mongoUri);
+        logger_1.default.info('✅ MongoDB conectado com sucesso!');
     }
     catch (error) {
-        console.error('❌ MongoDB connection error:', error);
-        console.log('💡 Verifique se o MongoDB está rodando: docker-compose ps');
+        logger_1.default.error({ err: error }, '❌ Erro ao conectar ao MongoDB');
         process.exit(1);
     }
 };
-mongoose_1.default.connection.on('disconnected', () => {
-    console.log('⚠️  MongoDB disconnected');
-});
-mongoose_1.default.connection.on('error', (err) => {
-    console.error('❌ MongoDB connection error:', err);
-});
 exports.default = connectDB;
 //# sourceMappingURL=database.js.map
