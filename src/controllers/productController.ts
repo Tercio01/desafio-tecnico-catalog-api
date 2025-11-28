@@ -1,10 +1,94 @@
 import { Request, Response } from 'express';
 import Product from '../models/Product';
-import mongoose from 'mongoose';
+import logger from '../utils/logger';
 
-console.log('✅ ProductController carregado');
+// List all products com filtros
+export const getProducts = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string;
+    const category = req.query.category as string;
+    const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined;
+    const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined;
 
-// ===== CREATE =====
+    interface ProductFilter {
+      $or?: Array<{ name: { $regex: string; $options: string } } | { description: { $regex: string; $options: string } }>;
+      category?: string;
+      price?: { $gte?: number; $lte?: number };
+    }
+
+    const filter: ProductFilter = {};
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    if (category) {
+      filter.category = category;
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      filter.price = {};
+      if (minPrice !== undefined) filter.price.$gte = minPrice;
+      if (maxPrice !== undefined) filter.price.$lte = maxPrice;
+    }
+
+    const skip = (page - 1) * limit;
+    const total = await Product.countDocuments(filter);
+    const products = await Product.find(filter).skip(skip).limit(limit);
+
+    res.json({
+      success: true,
+      data: products,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    logger.error('Erro ao listar produtos', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao listar produtos',
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
+// Get product by ID
+export const getProductById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      res.status(404).json({
+        success: false,
+        message: 'Produto não encontrado',
+      });
+      return;
+    }
+
+    res.json({
+      success: true,
+      data: product,
+    });
+  } catch (error) {
+    logger.error('Erro ao buscar produto', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao buscar produto',
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
+// Create product
 export const createProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, description, price, category, sku, stock } = req.body;
@@ -25,114 +109,27 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       message: 'Produto criado com sucesso',
       data: product,
     });
-  } catch (error: any) {
-    console.error('❌ Erro em createProduct:', error.message);
-    res.status(400).json({
-      success: false,
-      message: 'Dados de produto inválidos',
-      error: error.message,
-    });
-  }
-};
-
-// ===== READ (Get all) =====
-export const getProducts = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { category, minPrice, maxPrice, search, page = 1, limit = 10 } = req.query;
-    const filter: any = {};
-
-    if (category) filter.category = category;
-    if (minPrice || maxPrice) {
-      filter.price = {};
-      if (minPrice) filter.price.$gte = Number(minPrice);
-      if (maxPrice) filter.price.$lte = Number(maxPrice);
-    }
-    if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-      ];
-    }
-
-    const skip = (Number(page) - 1) * Number(limit);
-    const products = await Product.find(filter).skip(skip).limit(Number(limit));
-
-    const total = await Product.countDocuments(filter);
-
-    res.json({
-      success: true,
-      data: products,
-      pagination: {
-        total,
-        page: Number(page),
-        limit: Number(limit),
-        pages: Math.ceil(total / Number(limit)),
-      },
-    });
-  } catch (error: any) {
-    console.error('❌ Erro em getProducts:', error.message);
+  } catch (error) {
+    logger.error('Erro ao criar produto', error);
     res.status(500).json({
       success: false,
-      message: 'Erro ao buscar produtos',
-      error: error.message,
+      message: 'Erro ao criar produto',
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 };
 
-// ===== READ (Get by ID) =====
-export const getProductById = async (req: Request, res: Response): Promise<void> => {
-  try {
-    console.log(`📝 GET /api/products/${req.params.id} chamado`);
-
-    // Validar se ID é um ObjectId válido
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      res.status(404).json({
-        success: false,
-        message: 'Produto não encontrado',
-      });
-      return;
-    }
-
-    const product = await Product.findById(req.params.id);
-
-    if (!product) {
-      res.status(404).json({
-        success: false,
-        message: 'Produto não encontrado',
-      });
-      return;
-    }
-
-    res.json({
-      success: true,
-      data: product,
-    });
-  } catch (error: any) {
-    console.error('❌ Erro em getProductById:', error.message);
-    res.status(500).json({
-      success: false,
-      message: 'Erro ao buscar produto',
-      error: error.message,
-    });
-  }
-};
-
-// ===== UPDATE =====
+// Update product
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Validar se ID é um ObjectId válido
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      res.status(404).json({
-        success: false,
-        message: 'Produto não encontrado',
-      });
-      return;
-    }
+    const { id } = req.params;
+    const updates = req.body;
 
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const product = await Product.findByIdAndUpdate(
+      id,
+      updates,
+      { new: true, runValidators: true }
+    );
 
     if (!product) {
       res.status(404).json({
@@ -147,29 +144,22 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       message: 'Produto atualizado com sucesso',
       data: product,
     });
-  } catch (error: any) {
-    console.error('❌ Erro em updateProduct:', error.message);
-    res.status(400).json({
+  } catch (error) {
+    logger.error('Erro ao atualizar produto', error);
+    res.status(500).json({
       success: false,
       message: 'Erro ao atualizar produto',
-      error: error.message,
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 };
 
-// ===== DELETE =====
+// Delete product
 export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Validar se ID é um ObjectId válido
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      res.status(404).json({
-        success: false,
-        message: 'Produto não encontrado',
-      });
-      return;
-    }
+    const { id } = req.params;
 
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findByIdAndDelete(id);
 
     if (!product) {
       res.status(404).json({
@@ -184,12 +174,12 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
       message: 'Produto deletado com sucesso',
       data: product,
     });
-  } catch (error: any) {
-    console.error('❌ Erro em deleteProduct:', error.message);
+  } catch (error) {
+    logger.error('Erro ao deletar produto', error);
     res.status(500).json({
       success: false,
       message: 'Erro ao deletar produto',
-      error: error.message,
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 };

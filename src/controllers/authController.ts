@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
+import logger from '../utils/logger';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
@@ -29,7 +30,7 @@ export const register = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     // Verificar se usuário já existe
     const existingUser = await User.findOne({ email });
@@ -42,7 +43,7 @@ export const register = async (
     }
 
     // Criar novo usuário
-    const user = new User({ name, email, password });
+    const user = new User({ name, email, password, role });
     await user.save();
 
     // Gerar token
@@ -62,12 +63,7 @@ export const register = async (
       },
     });
   } catch (error) {
-    console.error('❌ ERRO DETALHADO:', error);
-    console.error('Tipo de erro:', typeof error);
-    console.error(
-      'Stack:',
-      error instanceof Error ? error.stack : 'N/A'
-    );
+    logger.error('Erro ao registrar usuário', error);
     res.status(500).json({
       success: false,
       message: 'Erro ao registrar usuário',
@@ -118,12 +114,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error) {
-    console.error('❌ ERRO DETALHADO:', error);
-    console.error('Tipo de erro:', typeof error);
-    console.error(
-      'Stack:',
-      error instanceof Error ? error.stack : 'N/A'
-    );
+    logger.error('Erro ao fazer login', error);
     res.status(500).json({
       success: false,
       message: 'Erro ao fazer login',
@@ -150,12 +141,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       data: user,
     });
   } catch (error) {
-    console.error('❌ ERRO DETALHADO:', error);
-    console.error('Tipo de erro:', typeof error);
-    console.error(
-      'Stack:',
-      error instanceof Error ? error.stack : 'N/A'
-    );
+    logger.error('Erro ao buscar usuário', error);
     res.status(500).json({
       success: false,
       message: 'Erro ao buscar usuário',
