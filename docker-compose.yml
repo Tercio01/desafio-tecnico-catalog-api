@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+  catalog-network:
+    driver: bridge
+
 services:
   mongodb:
     image: mongo:4.4.24
@@ -13,6 +17,8 @@ services:
       MONGO_INITDB_DATABASE: catalogdb
     volumes:
       - mongodb_data:/data/db
+    networks:
+      - catalog-network
 
   mongo-express:
     image: mongo-express:1.0.2-20
@@ -26,6 +32,30 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://admin:password123@mongodb:27017/
     depends_on:
       - mongodb
+    networks:
+      - catalog-network
+
+  api:
+    build: .
+    container_name: catalog-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      MONGODB_URI: mongodb://admin:password123@mongodb:27017/catalogdb?authSource=admin
+      JWT_SECRET: your_jwt_secret_key_here_change_in_production
+    depends_on:
+      - mongodb
+    networks:
+      - catalog-network
 
 volumes:
   mongodb_data:
+ 
+
+networks:
+  catalog-network:
+    driver: bridge
+
