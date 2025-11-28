@@ -1,4 +1,6 @@
-// Simple logger utility to avoid console warnings in production
+// Simple logger utility - console calls are intentional for development
+/* eslint-disable no-console */
+
 const logger = {
   error: (message: string, _error?: unknown) => {
     // In development, log to console
