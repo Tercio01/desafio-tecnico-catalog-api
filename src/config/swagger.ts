@@ -1,5 +1,7 @@
 import swaggerJSDoc from 'swagger-jsdoc';
 import { SwaggerDefinition } from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+import { Express } from 'express';
 
 const swaggerDefinition: SwaggerDefinition = {
   openapi: '3.0.0',
@@ -148,4 +150,10 @@ const options: swaggerJSDoc.Options = {
   apis: ['./src/routes/*.ts', './src/routes/*.swagger.ts'],
 };
 
-export const swaggerSpec = swaggerJSDoc(options);
+const swaggerSpec = swaggerJSDoc(options);
+
+export const setupSwagger = (app: Express): void => {
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  // eslint-disable-next-line no-console
+  console.log('Swagger docs available at http://localhost:3000/api-docs');
+};

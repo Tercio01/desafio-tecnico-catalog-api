@@ -6,10 +6,14 @@ import authRoutes from './routes/authRoutes';
 import productRoutes from './routes/productRoutes';
 import logger from './utils/logger';
 import { publicApiLimiter } from './middleware/rateLimit';
+import { setupSwagger } from './config/swagger';
 
 dotenv.config();
 
 const app = express();
+
+// Documentação Swagger
+setupSwagger(app);
 
 // Middlewares básicos
 app.use(cors());
