@@ -5,29 +5,29 @@ let adminToken: string;
 
 describe('Product API', () => {
   beforeAll(async () => {
-    const registerRes = await request(app)
-      .post('/api/auth/register')
+    await request(app)
+      .post('/api/v1/auth/register')
       .send({
         name: 'Admin User',
         email: 'admin@example.com',
         password: 'admin123',
-        role: 'admin'
+        role: 'admin',
       });
 
     const loginRes = await request(app)
-      .post('/api/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: 'admin@example.com',
-        password: 'admin123'
+        password: 'admin123',
       });
 
     adminToken = loginRes.body.data.token;
   });
 
-  describe('POST /api/products (Create)', () => {
+  describe('POST /api/v1/products (Create)', () => {
     it('should create a new product', async () => {
       const res = await request(app)
-        .post('/api/products')
+        .post('/api/v1/products')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'Laptop Dell',
@@ -35,7 +35,7 @@ describe('Product API', () => {
           price: 1299.99,
           category: 'Eletrônicos',
           sku: 'DELL-001',
-          stock: 50
+          stock: 50,
         });
 
       expect(res.status).toBe(201);
@@ -45,20 +45,20 @@ describe('Product API', () => {
 
     it('should reject product without auth', async () => {
       const res = await request(app)
-        .post('/api/products')
+        .post('/api/v1/products')
         .send({
           name: 'Product',
-          price: 100
+          price: 100,
         });
 
       expect(res.status).toBe(401);
     });
   });
 
-  describe('GET /api/products (List)', () => {
+  describe('GET /api/v1/products (List)', () => {
     it('should list all products', async () => {
       const res = await request(app)
-        .get('/api/products');
+        .get('/api/v1/products');
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -67,7 +67,7 @@ describe('Product API', () => {
 
     it('should filter by category', async () => {
       const res = await request(app)
-        .get('/api/products?category=Eletrônicos');
+        .get('/api/v1/products?category=Eletrônicos');
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -75,18 +75,17 @@ describe('Product API', () => {
 
     it('should filter by price range', async () => {
       const res = await request(app)
-        .get('/api/products?minPrice=100&maxPrice=2000');
+        .get('/api/v1/products?minPrice=100&maxPrice=2000');
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
     });
   });
 
-  describe('GET /api/products/:id (Get by ID)', () => {
+  describe('GET /api/v1/products/:id (Get by ID)', () => {
     it('should get product by id', async () => {
-      // Criar um produto primeiro
       const createRes = await request(app)
-        .post('/api/products')
+        .post('/api/v1/products')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'Test Product GetById',
@@ -94,33 +93,33 @@ describe('Product API', () => {
           price: 300,
           category: 'Eletrônicos',
           sku: 'GETBYID-001',
-          stock: 15
+          stock: 15,
         });
 
       const productId = createRes.body.data._id;
 
       const res = await request(app)
-        .get(`/api/products/${productId}`);
+        .get(`/api/v1/products/${productId}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.data.name).toBe('Test Product GetById');
     });
 
-    it('should return 404 for invalid id', async () => {
+    it('should return 400 for invalid id format', async () => {
       const res = await request(app)
-        .get('/api/products/invalid-id-12345');
+        .get('/api/v1/products/invalid-id-12345');
 
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe('ID inválido. Deve ser um ObjectId válido do MongoDB');
     });
   });
 
-  describe('PUT /api/products/:id (Update)', () => {
+  describe('PUT /api/v1/products/:id (Update)', () => {
     it('should update product', async () => {
-      // Criar um produto primeiro
       const createRes = await request(app)
-        .post('/api/products')
+        .post('/api/v1/products')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'Test Product Update',
@@ -128,17 +127,17 @@ describe('Product API', () => {
           price: 250,
           category: 'Eletrônicos',
           sku: 'UPDATE-001',
-          stock: 10
+          stock: 10,
         });
 
       const productId = createRes.body.data._id;
 
       const res = await request(app)
-        .put(`/api/products/${productId}`)
+        .put(`/api/v1/products/${productId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           price: 199.99,
-          stock: 5
+          stock: 5,
         });
 
       expect(res.status).toBe(200);
@@ -146,9 +145,8 @@ describe('Product API', () => {
     });
 
     it('should reject update without auth', async () => {
-      // Criar um produto primeiro
       const createRes = await request(app)
-        .post('/api/products')
+        .post('/api/v1/products')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'Test Product No Auth',
@@ -156,26 +154,25 @@ describe('Product API', () => {
           price: 200,
           category: 'Eletrônicos',
           sku: 'NOAUTH-001',
-          stock: 8
+          stock: 8,
         });
 
       const productId = createRes.body.data._id;
 
       const res = await request(app)
-        .put(`/api/products/${productId}`)
+        .put(`/api/v1/products/${productId}`)
         .send({
-          price: 1000
+          price: 1000,
         });
 
       expect(res.status).toBe(401);
     });
   });
 
-  describe('DELETE /api/products/:id', () => {
+  describe('DELETE /api/v1/products/:id', () => {
     it('should delete product', async () => {
-      // Criar um produto primeiro
       const createRes = await request(app)
-        .post('/api/products')
+        .post('/api/v1/products')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'Test Product Delete',
@@ -183,13 +180,13 @@ describe('Product API', () => {
           price: 150,
           category: 'Eletrônicos',
           sku: 'DELETE-001',
-          stock: 5
+          stock: 5,
         });
 
       const productId = createRes.body.data._id;
 
       const res = await request(app)
-        .delete(`/api/products/${productId}`)
+        .delete(`/api/v1/products/${productId}`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(res.status).toBe(200);
@@ -197,9 +194,8 @@ describe('Product API', () => {
     });
 
     it('should reject delete without auth', async () => {
-      // Criar um produto primeiro
       const createRes = await request(app)
-        .post('/api/products')
+        .post('/api/v1/products')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'Test Product Delete Auth',
@@ -207,13 +203,13 @@ describe('Product API', () => {
           price: 100,
           category: 'Eletrônicos',
           sku: 'DELETE-AUTH-001',
-          stock: 5
+          stock: 5,
         });
 
       const productId = createRes.body.data._id;
 
       const res = await request(app)
-        .delete(`/api/products/${productId}`);
+        .delete(`/api/v1/products/${productId}`);
 
       expect(res.status).toBe(401);
     });

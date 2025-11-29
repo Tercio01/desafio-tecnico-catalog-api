@@ -2,15 +2,15 @@ import request from 'supertest';
 import app from '../src/index';
 
 describe('Auth API', () => {
-  describe('POST /api/auth/register', () => {
+  describe('POST /api/v1/auth/register', () => {
     it('should register a new user', async () => {
       const res = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           name: 'Test User',
           email: 'test@example.com',
           password: 'password123',
-          role: 'user'
+          role: 'admin',
         });
 
       expect(res.status).toBe(201);
@@ -21,21 +21,21 @@ describe('Auth API', () => {
 
     it('should reject duplicate email', async () => {
       await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send({
-          name: 'User 1',
+          name: 'Test User 2',
           email: 'duplicate@example.com',
           password: 'password123',
-          role: 'user'
+          role: 'user',
         });
 
       const res = await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send({
-          name: 'User 2',
+          name: 'Test User 2',
           email: 'duplicate@example.com',
           password: 'password123',
-          role: 'user'
+          role: 'user',
         });
 
       expect(res.status).toBe(400);
@@ -43,24 +43,22 @@ describe('Auth API', () => {
     });
   });
 
-  describe('POST /api/auth/login', () => {
-    beforeEach(async () => {
+  describe('POST /api/v1/auth/login', () => {
+    it('should login successfully', async () => {
       await request(app)
-        .post('/api/auth/register')
+        .post('/api/v1/auth/register')
         .send({
-          name: 'Login Test',
+          name: 'Login User',
           email: 'login@example.com',
           password: 'password123',
-          role: 'user'
+          role: 'user',
         });
-    });
 
-    it('should login successfully', async () => {
       const res = await request(app)
-        .post('/api/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'login@example.com',
-          password: 'password123'
+          password: 'password123',
         });
 
       expect(res.status).toBe(200);
@@ -70,11 +68,20 @@ describe('Auth API', () => {
     });
 
     it('should reject invalid password', async () => {
-      const res = await request(app)
-        .post('/api/auth/login')
+      await request(app)
+        .post('/api/v1/auth/register')
         .send({
-          email: 'login@example.com',
-          password: 'wrongpassword'
+          name: 'Invalid Password User',
+          email: 'invalidpass@example.com',
+          password: 'password123',
+          role: 'user',
+        });
+
+      const res = await request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: 'invalidpass@example.com',
+          password: 'wrongpassword',
         });
 
       expect(res.status).toBe(401);

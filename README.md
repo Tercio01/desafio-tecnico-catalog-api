@@ -171,23 +171,46 @@ text
 
 ### Autenticação
 
-POST /api/auth/register # Registrar novo usuário
-POST /api/auth/login # Fazer login e receber JWT
-GET /api/auth/me # Dados do usuário autenticado
+        POST /api/v1/auth/register
+
+        POST /api/v1/auth/login
+
+        Produtos
+
+        GET /api/v1/products
+
+        GET /api/v1/products/:id
+
+        POST /api/v1/products
+
+        PUT /api/v1/products/:id
+
+        DELETE /api/v1/products/:id
 
 text
 
 ### Produtos
 
-GET /api/products # Listar todos os produtos
-GET /api/products?category=... # Filtrar por categoria
-GET /api/products?search=... # Buscar por nome/descrição
-GET /api/products?minPrice=... # Filtrar por preço mínimo
-GET /api/products?maxPrice=... # Filtrar por preço máximo
-GET /api/products/:id # Buscar produto específico
-POST /api/products # Criar novo produto (admin)
-PUT /api/products/:id # Atualizar produto (admin)
-DELETE /api/products/:id # Deletar produto (admin)
+GET    /api/v1/products                     # Listar todos os produtos
+GET    /api/v1/products?category=...        # Filtrar por categoria
+GET    /api/v1/products?search=...          # Buscar por nome/descrição
+GET    /api/v1/products?minPrice=...        # Filtrar por preço mínimo
+GET    /api/v1/products?maxPrice=...        # Filtrar por preço máximo
+GET    /api/v1/products/:id                 # Buscar produto específico
+POST   /api/v1/products                     # Criar novo produto (admin)
+PUT    /api/v1/products/:id                 # Atualizar produto (admin)
+DELETE /api/v1/products/:id                 # Deletar produto (admin)
+
+### Versionamento da API
+
+- Todos os endpoints de negócio estão sob o prefixo `/api/v1`.
+- Futuras versões poderão ser expostas em novos caminhos, como `/api/v2`, mantendo compatibilidade com clientes antigos.
+
+### Rate limiting
+
+- Os endpoints públicos de produtos (`GET /api/v1/products` e variações de query string) possuem limite de **100 requisições por IP a cada 15 minutos**.
+- Ao exceder o limite, a API retorna **HTTP 429 (Too Many Requests)** com o corpo:
+  - `{"success": false, "message": "Muitas requisições deste IP. Tente novamente mais tarde."}`
 
 text
 

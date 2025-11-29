@@ -1,102 +1,69 @@
-import { errorHandler } from './middleware/errorHandler';
-import express, { Application, Request, Response } from 'express';
+import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import pinoHttp from 'pino-http';
-import swaggerUi from 'swagger-ui-express';
-import connectDB from './config/database';
-import productRoutes from './routes/productRoutes';
+import connectDatabase from './config/database';
 import authRoutes from './routes/authRoutes';
-import logger from './config/logger';
-import { swaggerSpec } from './config/swagger';
+import productRoutes from './routes/productRoutes';
+import logger from './utils/logger';
+import { publicApiLimiter } from './middleware/rateLimit';
 
-// Carregar variáveis de ambiente
 dotenv.config();
 
-// Criar aplicação Express
-const app: Application = express();
+const app = express();
 
-// Middlewares
+// Middlewares básicos
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Logger HTTP
-app.use(pinoHttp({ logger }));
+// Conexão com o banco
+connectDatabase();
 
-// Rotas
-app.get('/', (req: Request, res: Response) => {
+// Rotas públicas básicas
+app.get('/', (_req, res) => {
   res.json({
     success: true,
-    message: '🚀 API Catálogo de Produtos - Funcionando!',
-    version: '1.0.0',
-    endpoints: {
-      auth: '/api/auth',
-      products: '/api/products',
-      health: '/health',
-    },
+    message: 'API de Catálogo de Produtos',
+    docs: '/api-docs',
   });
 });
 
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (_req, res) => {
   res.json({
-    success: true,
     status: 'OK',
     timestamp: new Date().toISOString(),
   });
 });
 
-// Documentação Swagger
-app.use(
-  '/api-docs',
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerSpec, {
-    customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: 'Catalog API - Documentação',
-  })
-);
+// Rotas versionadas
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/products', publicApiLimiter, productRoutes);
 
-// Rotas da API
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-
-// Middleware de erro (deve vir antes da rota 404 e depois das rotas)
-app.use(errorHandler);
-
-
-// Rota 404
-app.use((req: Request, res: Response) => {
+// Middleware de rota não encontrada
+app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: 'Rota não encontrada',
+    message: `Rota não encontrada: ${req.method} ${req.originalUrl}`,
   });
 });
 
-// Porta
+// Middleware global de erro
+app.use(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  (err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    logger.error('Erro inesperado na aplicação', err);
+    res.status(500).json({
+      success: false,
+      message: 'Erro interno no servidor',
+    });
+  }
+);
+
 const PORT = process.env.PORT || 3000;
 
-// Conectar ao banco e iniciar servidor
-const startServer = async () => {
-  try {
-    await connectDB();
-
-    app.listen(PORT, () => {
-      logger.info(`🚀 Servidor rodando na porta ${PORT}`);
-      logger.info(`📍 URL: http://localhost:${PORT}`);
-      logger.info('📚 Endpoints disponíveis:');
-      logger.info('   - GET  / (Informações da API)');
-      logger.info('   - GET  /health (Health check)');
-      logger.info('   - POST /api/auth/register (Registrar usuário)');
-      logger.info('   - POST /api/auth/login (Login)');
-      logger.info('   - GET  /api/products (Listar produtos)');
-      logger.info('   - POST /api/products (Criar produto - Admin)');
-    });
-  } catch (error) {
-    logger.error({ err: error }, '❌ Erro ao iniciar servidor');
-    process.exit(1);
-  }
-};
-
-startServer();
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    logger.info(`🚀 Servidor rodando na porta ${PORT}`);
+  });
+}
 
 export default app;

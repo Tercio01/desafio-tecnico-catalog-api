@@ -64,7 +64,18 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
 // Get product by ID
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const product = await Product.findById(req.params.id);
+    const { id } = req.params;
+
+    // Validar se é um ObjectId válido do MongoDB
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      res.status(400).json({
+        success: false,
+        message: 'ID inválido. Deve ser um ObjectId válido do MongoDB',
+      });
+      return;
+    }
+
+    const product = await Product.findById(id);
 
     if (!product) {
       res.status(404).json({
@@ -125,6 +136,15 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     const { id } = req.params;
     const updates = req.body;
 
+    // Validar se é um ObjectId válido do MongoDB
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      res.status(400).json({
+        success: false,
+        message: 'ID inválido. Deve ser um ObjectId válido do MongoDB',
+      });
+      return;
+    }
+
     const product = await Product.findByIdAndUpdate(
       id,
       updates,
@@ -158,6 +178,15 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
 export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+
+    // Validar se é um ObjectId válido do MongoDB
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      res.status(400).json({
+        success: false,
+        message: 'ID inválido. Deve ser um ObjectId válido do MongoDB',
+      });
+      return;
+    }
 
     const product = await Product.findByIdAndDelete(id);
 
