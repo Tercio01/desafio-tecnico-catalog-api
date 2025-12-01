@@ -70,7 +70,7 @@ const login = async (req, res) => {
             return;
         }
         const token = generateToken(user._id.toString());
-        res.json({
+        res.status(200).json({
             success: true,
             message: 'Login realizado com sucesso',
             data: {
@@ -104,7 +104,7 @@ const getMe = async (req, res) => {
             });
             return;
         }
-        res.json({
+        res.status(200).json({
             success: true,
             data: user,
         });

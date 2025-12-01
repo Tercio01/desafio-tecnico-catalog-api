@@ -1,22 +1,15 @@
 import { Router } from 'express';
+import { register, login, getMe } from '../controllers/authController';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
 console.log('[DEBUG-AUTH] Router criado');
 
-// Rota de teste direto
-router.post('/register', (req, res) => {
-  console.log('[DEBUG-AUTH] POST /register chamado!');
-  res.json({ success: true, message: 'Rota funcionando!' });
-});
-
-router.post('/login', (req, res) => {
-  res.json({ success: true, message: 'Login funcionando!' });
-});
-
-router.get('/me', (req, res) => {
-  res.json({ success: true, message: 'Get ME funcionando!' });
-});
+// Rotas de autenticação
+router.post('/register', register);
+router.post('/login', login);
+router.get('/me', authenticate, getMe);
 
 console.log('[DEBUG-AUTH] Rotas registradas');
 

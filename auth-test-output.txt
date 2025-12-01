@@ -1,0 +1,144 @@
+
+> catalog-api@1.0.0 test
+> jest auth.test.ts
+
+  console.log
+    [dotenv@17.2.3] injecting env (3) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [DEBUG-AUTH] Router criado
+
+      at Object.<anonymous> (src/routes/authRoutes.ts:5:9)
+
+  console.log
+    [DEBUG-AUTH] Rotas registradas
+
+      at Object.<anonymous> (src/routes/authRoutes.ts:21:9)
+
+  console.log
+    [DEBUG-PRODUCTS] Router criado
+
+      at Object.<anonymous> (src/routes/productRoutes.ts:13:9)
+
+  console.log
+    [DEBUG-PRODUCTS] Rotas registradas
+
+      at Object.<anonymous> (src/routes/productRoutes.ts:21:9)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    Swagger docs available at http://localhost:3000/api-docs
+
+      at setupSwagger (src/config/swagger.ts:158:11)
+
+  console.log
+    [DEBUG-AUTH] POST /register chamado!
+
+      at src/routes/authRoutes.ts:9:11
+
+[2025-12-01 16:33:53.288 -0300] [32mINFO[39m: [36m✅ MongoDB conectado com sucesso![39m
+  console.log
+    [DEBUG-AUTH] POST /register chamado!
+
+      at src/routes/authRoutes.ts:9:11
+
+  console.log
+    [DEBUG-AUTH] POST /register chamado!
+
+      at src/routes/authRoutes.ts:9:11
+
+  console.log
+    [DEBUG-AUTH] POST /register chamado!
+
+      at src/routes/authRoutes.ts:9:11
+
+  console.log
+    [DEBUG-AUTH] POST /register chamado!
+
+      at src/routes/authRoutes.ts:9:11
+
+FAIL tests/auth.test.ts (18.026 s)
+  Auth API
+    POST /api/v1/auth/register
+      ✕ should register a new user (590 ms)
+      ✕ should reject duplicate email (35 ms)
+    POST /api/v1/auth/login
+      ✕ should login successfully (28 ms)
+      ✕ should reject invalid password (30 ms)
+
+  ● Auth API › POST /api/v1/auth/register › should register a new user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 200
+
+      14 |         });
+      15 |
+    > 16 |       expect(res.status).toBe(201);
+         |                          ^
+      17 |       expect(res.body.success).toBe(true);
+      18 |       expect(res.body.data.user.email).toBe('test@example.com');
+      19 |       expect(res.body.data.token).toBeDefined();
+
+      at Object.<anonymous> (tests/auth.test.ts:16:26)
+
+  ● Auth API › POST /api/v1/auth/register › should reject duplicate email
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 200
+
+      39 |         });
+      40 |
+    > 41 |       expect(res.status).toBe(400);
+         |                          ^
+      42 |       expect(res.body.success).toBe(false);
+      43 |     });
+      44 |   });
+
+      at Object.<anonymous> (tests/auth.test.ts:41:26)
+
+  ● Auth API › POST /api/v1/auth/login › should login successfully
+
+    TypeError: Cannot read properties of undefined (reading 'token')
+
+      64 |       expect(res.status).toBe(200);
+      65 |       expect(res.body.success).toBe(true);
+    > 66 |       expect(res.body.data.token).toBeDefined();
+         |                            ^
+      67 |       expect(res.body.data.user.email).toBe('login@example.com');
+      68 |     });
+      69 |
+
+      at Object.<anonymous> (tests/auth.test.ts:66:28)
+
+  ● Auth API › POST /api/v1/auth/login › should reject invalid password
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 401
+    Received: 200
+
+      85 |         });
+      86 |
+    > 87 |       expect(res.status).toBe(401);
+         |                          ^
+      88 |       expect(res.body.success).toBe(false);
+      89 |     });
+      90 |   });
+
+      at Object.<anonymous> (tests/auth.test.ts:87:26)
+
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 4 total
+Snapshots:   0 total
+Time:        19.373 s
+Ran all test suites matching auth.test.ts.
