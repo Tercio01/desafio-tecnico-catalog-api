@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMe = exports.login = exports.register = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../models/User"));
+const logger_1 = __importDefault(require("../utils/logger"));
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 const generateToken = (userId) => {
@@ -13,16 +14,16 @@ const generateToken = (userId) => {
 };
 const register = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, role } = req.body;
         const existingUser = await User_1.default.findOne({ email });
         if (existingUser) {
             res.status(400).json({
                 success: false,
-                message: 'Usuário já existe com este email'
+                message: 'Usuário já existe com este email',
             });
             return;
         }
-        const user = new User_1.default({ name, email, password });
+        const user = new User_1.default({ name, email, password, role });
         await user.save();
         const token = generateToken(user._id.toString());
         res.status(201).json({
@@ -33,17 +34,18 @@ const register = async (req, res) => {
                     id: user._id,
                     name: user.name,
                     email: user.email,
-                    role: user.role
+                    role: user.role,
                 },
-                token
-            }
+                token,
+            },
         });
     }
     catch (error) {
+        logger_1.default.error('Erro ao registrar usuário', error);
         res.status(500).json({
             success: false,
             message: 'Erro ao registrar usuário',
-            error: error instanceof Error ? error.message : 'Erro desconhecido'
+            error: error instanceof Error ? error.message : String(error),
         });
     }
 };
@@ -55,7 +57,7 @@ const login = async (req, res) => {
         if (!user) {
             res.status(401).json({
                 success: false,
-                message: 'Credenciais inválidas'
+                message: 'Credenciais inválidas',
             });
             return;
         }
@@ -63,7 +65,7 @@ const login = async (req, res) => {
         if (!isPasswordValid) {
             res.status(401).json({
                 success: false,
-                message: 'Credenciais inválidas'
+                message: 'Credenciais inválidas',
             });
             return;
         }
@@ -76,17 +78,18 @@ const login = async (req, res) => {
                     id: user._id,
                     name: user.name,
                     email: user.email,
-                    role: user.role
+                    role: user.role,
                 },
-                token
-            }
+                token,
+            },
         });
     }
     catch (error) {
+        logger_1.default.error('Erro ao fazer login', error);
         res.status(500).json({
             success: false,
             message: 'Erro ao fazer login',
-            error: error instanceof Error ? error.message : 'Erro desconhecido'
+            error: error instanceof Error ? error.message : String(error),
         });
     }
 };
@@ -97,20 +100,21 @@ const getMe = async (req, res) => {
         if (!user) {
             res.status(404).json({
                 success: false,
-                message: 'Usuário não encontrado'
+                message: 'Usuário não encontrado',
             });
             return;
         }
         res.json({
             success: true,
-            data: user
+            data: user,
         });
     }
     catch (error) {
+        logger_1.default.error('Erro ao buscar usuário', error);
         res.status(500).json({
             success: false,
             message: 'Erro ao buscar usuário',
-            error: error instanceof Error ? error.message : 'Erro desconhecido'
+            error: error instanceof Error ? error.message : String(error),
         });
     }
 };

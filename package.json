@@ -19,7 +19,11 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "precommit": "npm run lint && npm run typecheck && npm test",
-    "prepare": "node -e \"fs.existsSync('.husky') || fs.mkdirSync('.husky')\""
+    "prepare": "node -e \"fs.existsSync('.husky') || fs.mkdirSync('.husky')\"",
+    "load-test": "k6 run tests/load/load-test.js",
+    "load-test:light": "k6 run tests/load/load-test.js --vus 50 --duration 1m",
+    "load-test:medium": "k6 run tests/load/load-test.js --vus 300 --duration 3m",
+    "load-test:heavy": "k6 run tests/load/load-test.js --vus 1000 --duration 5m"
   },
   "keywords": [],
   "author": "",
@@ -31,11 +35,13 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
+    "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^9.0.0",
     "pino": "^10.1.0",
     "pino-http": "^11.0.0",
     "pino-pretty": "^13.1.2",
+    "redis": "^5.10.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "zod": "^4.1.13"
