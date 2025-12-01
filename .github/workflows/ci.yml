@@ -1,27 +1,43 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, develop ]
 
 jobs:
-  build-and-test:
+  test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
-      fail-fast: false
+    
+    services:
+      mongodb:
+        image: mongo:7
+        options: >-
+          --health-cmd mongosh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 27017:27017
+      
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
 
     steps:
     - uses: actions/checkout@v3
     
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+        node-version: '22'
     
     - name: Install dependencies
       run: npm ci
@@ -29,47 +45,24 @@ jobs:
     - name: Build
       run: npm run build
     
-    # Comentar testes por enquanto (problemas com MongoDB em memória)
-    # - name: Run tests
-    #   run: npm test
+    - name: Run tests
+      run: npm test
+      env:
+        MONGODB_URI: mongodb://localhost:27017/catalog-test
+        REDIS_URL: redis://localhost:6379
+    
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      if: always()
 
-  lint-code:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '20.x'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Lint Code
-      run: npx eslint src/ || true
-
-  security-audit:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '20.x'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Security Audit
-      run: npm audit --audit-level=moderate || true
-
-  build-docker:
+  deploy:
+    needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [build-and-test, lint-code, security-audit]
     
     steps:
     - uses: actions/checkout@v3
     
-    - name: Build Docker image
-      run: docker build -t catalog-api:latest .
+    - name: Deploy to production
+      run: echo "Deploying to production..."
+      # Adicione seus comandos de deploy aqui
