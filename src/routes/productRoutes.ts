@@ -10,13 +10,14 @@ import {
 
 const router = Router();
 
-// Rotas públicas
+console.log('[DEBUG-PRODUCTS] Router criado');
+
 router.get('/', getProducts);
 router.get('/:id', getProductById);
-
-// Rotas protegidas por autenticação
 router.post('/', authenticate, createProduct);
 router.put('/:id', authenticate, updateProduct);
 router.delete('/:id', authenticate, deleteProduct);
+
+console.log('[DEBUG-PRODUCTS] Rotas registradas');
 
 export default router;

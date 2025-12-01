@@ -100,7 +100,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Gerar token
     const token = generateToken(user._id.toString());
 
-    res.json({
+    res.status(200).json({
       success: true,
       message: 'Login realizado com sucesso',
       data: {
@@ -136,7 +136,7 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    res.json({
+    res.status(200).json({
       success: true,
       data: user,
     });

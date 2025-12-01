@@ -42,38 +42,37 @@ const UserSchema = new mongoose_1.Schema({
     name: {
         type: String,
         required: [true, 'Nome é obrigatório'],
-        trim: true
+        trim: true,
     },
     email: {
         type: String,
         required: [true, 'Email é obrigatório'],
         unique: true,
         lowercase: true,
-        trim: true
+        trim: true,
     },
     password: {
         type: String,
         required: [true, 'Senha é obrigatória'],
-        minlength: [6, 'Senha deve ter no mínimo 6 caracteres']
+        minlength: [6, 'Senha deve ter no mínimo 6 caracteres'],
     },
     role: {
         type: String,
         enum: ['user', 'admin'],
-        default: 'user'
-    }
+        default: 'user',
+    },
 }, {
-    timestamps: true
+    timestamps: true,
 });
-UserSchema.pre('save', async function (next) {
+UserSchema.pre('save', async function () {
     if (!this.isModified('password'))
-        return next();
+        return;
     try {
         const salt = await bcryptjs_1.default.genSalt(12);
         this.password = await bcryptjs_1.default.hash(this.password, salt);
-        next();
     }
-    catch (error) {
-        next(error);
+    catch (_error) {
+        throw _error;
     }
 });
 UserSchema.methods.comparePassword = async function (candidatePassword) {

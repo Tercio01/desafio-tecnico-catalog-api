@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:4.4.24
+    container_name: catalog-mongodb-prod
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: catalog
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - catalog-network
+    healthcheck:
+      test: mongosh --eval "db.adminCommand('ping')"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: catalog-api-prod
+    ports:
+      - "3002:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      MONGODB_URI: mongodb://mongodb:27017/catalog
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - catalog-network
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+
+networks:
+  catalog-network:
+    driver: bridge

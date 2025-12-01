@@ -4,8 +4,10 @@ const express_1 = require("express");
 const authController_1 = require("../controllers/authController");
 const auth_1 = require("../middleware/auth");
 const router = (0, express_1.Router)();
+console.log('[DEBUG-AUTH] Router criado');
 router.post('/register', authController_1.register);
 router.post('/login', authController_1.login);
 router.get('/me', auth_1.authenticate, authController_1.getMe);
+console.log('[DEBUG-AUTH] Rotas registradas');
 exports.default = router;
 //# sourceMappingURL=authRoutes.js.map

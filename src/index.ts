@@ -7,6 +7,7 @@ import productRoutes from './routes/productRoutes';
 import logger from './utils/logger';
 import { publicApiLimiter } from './middleware/rateLimit';
 import { setupSwagger } from './config/swagger';
+import { connectRedis, disconnectRedis } from './config/redis';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.get('/health', (_req, res) => {
 
 // Rotas versionadas
 app.use('/api/v1/auth', authRoutes);
+// ✅ RATE LIMITER REABILITADO
 app.use('/api/v1/products', publicApiLimiter, productRoutes);
 
 // Middleware de rota não encontrada
@@ -52,7 +54,6 @@ app.use((req, res) => {
 
 // Middleware global de erro
 app.use(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   (err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     logger.error('Erro inesperado na aplicação', err);
     res.status(500).json({
@@ -62,12 +63,26 @@ app.use(
   }
 );
 
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
+
+const startServer = async () => {
+  try {
+    // Conectar ao Redis
+    await connectRedis();
+    
+    if (process.env.NODE_ENV !== 'test') {
+      app.listen(PORT, () => {
+        logger.info(`🚀 Servidor rodando na porta ${PORT}`);
+      });
+    }
+  } catch (error) {
+    logger.error('Falha ao iniciar servidor:', error);
+    process.exit(1);
+  }
+};
 
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    logger.info(`🚀 Servidor rodando na porta ${PORT}`);
-  });
+  startServer();
 }
 
 export default app;
