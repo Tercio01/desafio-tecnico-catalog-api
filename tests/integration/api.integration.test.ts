@@ -11,7 +11,7 @@ describe('API Integration Tests', () => {
 
   beforeAll(async () => {
     if (!mongoose.connection.readyState) {
-      await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/catalog-test');
+      await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27018/catalog-test');
     }
     await User.deleteMany({});
     await Product.deleteMany({});
@@ -58,6 +58,7 @@ describe('API Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
       expect(response.body.data.email).toBe('test@example.com');
     });
   });
@@ -72,11 +73,14 @@ describe('API Integration Tests', () => {
           description: 'A test product',
           price: 99.99,
           quantity: 100,
+          category: 'eletrônicos',
+          sku: 'TEST-SKU-001',
         });
 
       expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
       expect(response.body.data.name).toBe('Test Product');
-      productId = response.body.data.id;
+      productId = response.body.data._id;
     });
 
     it('GET /api/v1/products - should list products', async () => {
@@ -85,7 +89,32 @@ describe('API Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBeGreaterThan(0);
+    });
+
+    it('PUT /api/v1/products/:id - should update a product', async () => {
+      const response = await request(app)
+        .put(`/api/v1/products/${productId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Updated Product',
+          price: 149.99,
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.name).toBe('Updated Product');
+    });
+
+    it('DELETE /api/v1/products/:id - should delete a product', async () => {
+      const response = await request(app)
+        .delete(`/api/v1/products/${productId}`)
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
     });
   });
 });
