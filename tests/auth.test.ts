@@ -1,7 +1,13 @@
 import request from 'supertest';
 import app from '../src/index';
+import User from '../src/models/User';
 
 describe('Auth API', () => {
+  // Limpa os usuários antes de rodar a suíte de autenticação
+  beforeAll(async () => {
+    await User.deleteMany({});
+  });
+
   describe('POST /api/v1/auth/register', () => {
     it('should register a new user', async () => {
       const res = await request(app)
