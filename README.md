@@ -1,4 +1,4 @@
-# 🚀 Desafio Técnico - Engenheiro de Software Júnior
+# 🚀 Desafio Técnico - Engenheiro de Software 
 
 [![Node.js](https://img.shields.io/badge/Node.js-22.x-green)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
