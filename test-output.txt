@@ -1,0 +1,262 @@
+
+> catalog-api@1.0.0 test
+> jest
+
+FAIL tests/products.test.ts (8.474 s)
+  ● Console
+
+    console.log
+      [dotenv@17.2.3] injecting env (6) from .env.test -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+    console.log
+      [JEST-SETUP] NODE_ENV: test
+
+      at Object.<anonymous> (jest.setup.ts:7:9)
+
+    console.log
+      [JEST-SETUP] MONGODB_URI: mongodb://admin:password123@localhost:27017/catalog-test?authSource=admin
+
+      at Object.<anonymous> (jest.setup.ts:8:9)
+
+    console.log
+      [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+    console.log
+      [DEBUG-AUTH] Router criado
+
+      at Object.<anonymous> (src/routes/authRoutes.ts:7:9)
+
+    console.log
+      [DEBUG-AUTH] Rotas registradas
+
+      at Object.<anonymous> (src/routes/authRoutes.ts:14:9)
+
+    console.log
+      [DEBUG-PRODUCTS] Router criado
+
+      at Object.<anonymous> (src/routes/productRoutes.ts:13:9)
+
+    console.log
+      [DEBUG-PRODUCTS] Rotas registradas
+
+      at Object.<anonymous> (src/routes/productRoutes.ts:21:9)
+
+    console.log
+      [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+    console.log
+      Swagger docs available at http://localhost:3000/api-docs
+
+      at setupSwagger (src/config/swagger.ts:158:11)
+
+  ● Product API › POST /api/v1/products (Create) › should create a new product
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 401
+
+      36 |         });
+      37 |
+    > 38 |       expect(res.status).toBe(201);
+         |                          ^
+      39 |       expect(res.body.success).toBe(true);
+      40 |       expect(res.body.data.name).toBe('Laptop Dell');
+      41 |     });
+
+      at Object.<anonymous> (tests/products.test.ts:38:26)
+
+  ● Product API › GET /api/v1/products/:id (Get by ID) › should get product by id
+
+    TypeError: Cannot read properties of undefined (reading '_id')
+
+      71 |         });
+      72 |
+    > 73 |       const productId = createRes.body.data._id;
+         |                                             ^
+      74 |
+      75 |       const res = await request(app).get(`/api/v1/products/${productId}`);
+      76 |
+
+      at Object.<anonymous> (tests/products.test.ts:73:45)
+
+  ● Product API › PUT /api/v1/products/:id (Update) › should update product
+
+    TypeError: Cannot read properties of undefined (reading '_id')
+
+      102 |         });
+      103 |
+    > 104 |       const productId = createRes.body.data._id;
+          |                                             ^
+      105 |
+      106 |       const res = await request(app)
+      107 |         .put(`/api/v1/products/${productId}`)
+
+      at Object.<anonymous> (tests/products.test.ts:104:45)
+
+  ● Product API › PUT /api/v1/products/:id (Update) › should reject update without auth
+
+    TypeError: Cannot read properties of undefined (reading '_id')
+
+      130 |         });
+      131 |
+    > 132 |       const productId = createRes.body.data._id;
+          |                                             ^
+      133 |
+      134 |       const res = await request(app)
+      135 |         .put(`/api/v1/products/${productId}`)
+
+      at Object.<anonymous> (tests/products.test.ts:132:45)
+
+  ● Product API › DELETE /api/v1/products/:id › should delete product
+
+    TypeError: Cannot read properties of undefined (reading '_id')
+
+      156 |         });
+      157 |
+    > 158 |       const productId = createRes.body.data._id;
+          |                                             ^
+      159 |
+      160 |       const res = await request(app)
+      161 |         .delete(`/api/v1/products/${productId}`)
+
+      at Object.<anonymous> (tests/products.test.ts:158:45)
+
+  ● Product API › DELETE /api/v1/products/:id › should reject delete without auth
+
+    TypeError: Cannot read properties of undefined (reading '_id')
+
+      179 |         });
+      180 |
+    > 181 |       const productId = createRes.body.data._id;
+          |                                             ^
+      182 |
+      183 |       const res = await request(app).delete(`/api/v1/products/${productId}`);
+      184 |
+
+      at Object.<anonymous> (tests/products.test.ts:181:45)
+
+[2025-12-01 18:37:41.998 -0300] [32mINFO[39m: [36m✅ MongoDB conectado com sucesso![39m
+[2025-12-01 18:37:44.627 -0300] [32mINFO[39m: [36m✅ MongoDB conectado com sucesso![39m
+PASS tests/auth.test.ts (5.471 s)
+  ● Console
+
+    console.log
+      [dotenv@17.2.3] injecting env (6) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+    console.log
+      [JEST-SETUP] NODE_ENV: test
+
+      at Object.<anonymous> (jest.setup.ts:7:9)
+
+    console.log
+      [JEST-SETUP] MONGODB_URI: mongodb://admin:password123@localhost:27017/catalog-test?authSource=admin
+
+      at Object.<anonymous> (jest.setup.ts:8:9)
+
+    console.log
+      [dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+    console.log
+      [DEBUG-AUTH] Router criado
+
+      at Object.<anonymous> (src/routes/authRoutes.ts:7:9)
+
+    console.log
+      [DEBUG-AUTH] Rotas registradas
+
+      at Object.<anonymous> (src/routes/authRoutes.ts:14:9)
+
+    console.log
+      [DEBUG-PRODUCTS] Router criado
+
+      at Object.<anonymous> (src/routes/productRoutes.ts:13:9)
+
+    console.log
+      [DEBUG-PRODUCTS] Rotas registradas
+
+      at Object.<anonymous> (src/routes/productRoutes.ts:21:9)
+
+    console.log
+      [dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+    console.log
+      Swagger docs available at http://localhost:3000/api-docs
+
+      at setupSwagger (src/config/swagger.ts:158:11)
+
+[2025-12-01 18:37:49.748 -0300] [32mINFO[39m: [36m✅ MongoDB conectado com sucesso![39m
+PASS tests/integration/api.integration.test.ts
+  ● Console
+
+    console.log
+      [dotenv@17.2.3] injecting env (6) from .env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+    console.log
+      [JEST-SETUP] NODE_ENV: test
+
+      at Object.<anonymous> (jest.setup.ts:7:9)
+
+    console.log
+      [JEST-SETUP] MONGODB_URI: mongodb://admin:password123@localhost:27017/catalog-test?authSource=admin
+
+      at Object.<anonymous> (jest.setup.ts:8:9)
+
+    console.log
+      [dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+    console.log
+      [DEBUG-AUTH] Router criado
+
+      at Object.<anonymous> (src/routes/authRoutes.ts:7:9)
+
+    console.log
+      [DEBUG-AUTH] Rotas registradas
+
+      at Object.<anonymous> (src/routes/authRoutes.ts:14:9)
+
+    console.log
+      [DEBUG-PRODUCTS] Router criado
+
+      at Object.<anonymous> (src/routes/productRoutes.ts:13:9)
+
+    console.log
+      [DEBUG-PRODUCTS] Rotas registradas
+
+      at Object.<anonymous> (src/routes/productRoutes.ts:21:9)
+
+    console.log
+      [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+    console.log
+      Swagger docs available at http://localhost:3000/api-docs
+
+      at setupSwagger (src/config/swagger.ts:158:11)
+
+
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       6 failed, 14 passed, 20 total
+Snapshots:   0 total
+Time:        17.704 s
+Ran all test suites.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.
