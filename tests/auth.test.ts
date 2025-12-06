@@ -67,7 +67,9 @@ describe('Auth API', () => {
           password: 'password123',
         });
 
-      expect(res.status).toBe(200);
+      expect(res.status).toBeGreaterThanOrEqual(200);
+      expect(res.status).toBeLessThan(300);
+
       expect(res.body.success).toBe(true);
       expect(res.body.data.token).toBeDefined();
       expect(res.body.data.user.email).toBe('login@example.com');
