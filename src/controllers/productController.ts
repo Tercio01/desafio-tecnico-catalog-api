@@ -25,10 +25,10 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-// Listar todos os produtos
+// Listar todos os produtos com paginação
 export const getAllProducts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { category, minPrice, maxPrice, search } = req.query;
+    const { category, minPrice, maxPrice, search, page = 1, limit = 10 } = req.query;
     
     let query: any = {};
     
@@ -46,11 +46,32 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
       query.$text = { $search: search as string };
     }
     
-    const products = await Product.find(query).sort({ createdAt: -1 });
+    // Paginação
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.max(1, Number(limit));
+    const skip = (pageNum - 1) * limitNum;
+    
+    // Total de documentos
+    const total = await Product.countDocuments(query);
+    
+    const products = await Product.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
+    
+    const totalPages = Math.ceil(total / limitNum);
     
     res.status(200).json({
       success: true,
       count: products.length,
+      pagination: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages,
+        hasNextPage: pageNum < totalPages,
+        hasPreviousPage: pageNum > 1
+      },
       data: products
     });
   } catch (error: any) {
