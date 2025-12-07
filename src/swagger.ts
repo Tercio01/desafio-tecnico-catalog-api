@@ -130,6 +130,35 @@ const options = {
             }
           }
         },
+        Pagination: {
+          type: 'object',
+          properties: {
+            total: {
+              type: 'integer',
+              description: 'Total number of items'
+            },
+            page: {
+              type: 'integer',
+              description: 'Current page number'
+            },
+            limit: {
+              type: 'integer',
+              description: 'Items per page'
+            },
+            totalPages: {
+              type: 'integer',
+              description: 'Total number of pages'
+            },
+            hasNextPage: {
+              type: 'boolean',
+              description: 'Whether there is a next page'
+            },
+            hasPreviousPage: {
+              type: 'boolean',
+              description: 'Whether there is a previous page'
+            }
+          }
+        },
         Error: {
           type: 'object',
           properties: {
@@ -146,6 +175,61 @@ const options = {
               description: 'HTTP status code'
             }
           }
+        }
+      },
+      parameters: {
+        pageParam: {
+          name: 'page',
+          in: 'query',
+          schema: {
+            type: 'integer',
+            default: 1,
+            minimum: 1
+          },
+          description: 'Page number for pagination'
+        },
+        limitParam: {
+          name: 'limit',
+          in: 'query',
+          schema: {
+            type: 'integer',
+            default: 10,
+            minimum: 1,
+            maximum: 100
+          },
+          description: 'Number of items per page'
+        },
+        categoryParam: {
+          name: 'category',
+          in: 'query',
+          schema: {
+            type: 'string'
+          },
+          description: 'Filter by product category'
+        },
+        minPriceParam: {
+          name: 'minPrice',
+          in: 'query',
+          schema: {
+            type: 'number'
+          },
+          description: 'Minimum price filter'
+        },
+        maxPriceParam: {
+          name: 'maxPrice',
+          in: 'query',
+          schema: {
+            type: 'number'
+          },
+          description: 'Maximum price filter'
+        },
+        searchParam: {
+          name: 'search',
+          in: 'query',
+          schema: {
+            type: 'string'
+          },
+          description: 'Search in product name and description'
         }
       }
     }
