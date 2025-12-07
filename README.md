@@ -4,6 +4,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-4.4-green)](https://www.mongodb.com/)
 [![Swagger](https://img.shields.io/badge/Swagger-OpenAPI%203.0-brightgreen)](https://swagger.io/)
+[![K6 Load Test](https://img.shields.io/badge/K6%20Load%20Test-9.8%2F10-brightgreen)](docs/K6_LOAD_TEST_FINAL.html)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Este repositório contém a solução completa para o **Desafio Técnico de Engenheiro de Software Júnior**, desenvolvido com Node.js, TypeScript, Express, MongoDB, JWT e documentação Swagger/OpenAPI.
@@ -258,7 +259,8 @@ catalog-api/
 ├── docs/
 │   ├── SWAGGER_DOCUMENTATION.md # Guia Swagger detalhado
 │   ├── ARCHITECTURE-AWS.md      # Documentação da arquitetura
-│   └── Desafio-Arquitetura-AWS.pdf
+│   ├── Desafio-Arquitetura-AWS.pdf
+│   └── K6_LOAD_TEST_FINAL.html # Load testing results
 ├── .env.example                 # Exemplo de variáveis de ambiente
 ├── .gitignore
 ├── docker-compose.yml           # Configuração do Docker Compose
