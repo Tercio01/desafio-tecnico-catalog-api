@@ -2,7 +2,7 @@
 
 [![Node.js](https://img.shields.io/badge/Node.js-22.x-green)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://www.typescriptlang.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-8.x-green)](https://www.mongodb.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-4.4-green)](https://www.mongodb.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Este repositório contém a solução completa para o **Desafio Técnico de Engenheiro de Software Júnior**, desenvolvido com Node.js, TypeScript, Express, MongoDB e JWT.
@@ -26,11 +26,14 @@ API running at http://localhost:3000 🚀
 ## 📋 Índice
 
 - [Sobre o Desafio](#sobre-o-desafio)
+- [⚡ Quick Start](#-quick-start)
+- [🔄 Recent Changes](#-recent-changes)
 - [Tecnologias Utilizadas](#tecnologias-utilizadas)
 - [Pré-requisitos](#pré-requisitos)
 - [Instalação e Execução](#instalação-e-execução)
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Endpoints da API](#endpoints-da-api)
+- [📊 CI/CD Pipeline](#-cicd-pipeline)
 - [Testes](#testes)
 - [Parte 2: Arquitetura](#parte-2-arquitetura)
 - [Autor](#autor)
