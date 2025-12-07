@@ -20,27 +20,32 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Swagger UI
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
-  swaggerOptions: {
-    persistAuthorization: true,
-    displayOperationId: true,
-    filter: true,
-    showExtensions: true,
-    defaultModelsExpandDepth: 1,
-    defaultModelExpandDepth: 1
-  },
-  customCss: `.swagger-ui .topbar { display: none }`,
-  customSiteTitle: 'Catalog API - Swagger UI'
-}));
-
+// ⭐ SWAGGER DEVE VIR ANTES DAS ROTAS 404
 // Rota para JSON da especificação OpenAPI
 app.get('/openapi.json', (req: Request, res: Response) => {
   res.setHeader('Content-Type', 'application/json');
   res.send(specs);
 });
 
-// Rotas
+// Swagger UI - ANTES das rotas protegidas
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(specs, {
+    swaggerOptions: {
+      persistAuthorization: true,
+      displayOperationId: true,
+      filter: true,
+      showExtensions: true,
+      defaultModelsExpandDepth: 1,
+      defaultModelExpandDepth: 1
+    },
+    customCss: `.swagger-ui .topbar { display: none }`,
+    customSiteTitle: 'Catalog API - Swagger UI'
+  })
+);
+
+// Rotas principais
 app.get('/', (req: Request, res: Response) => {
   res.json({
     success: true,
@@ -68,7 +73,7 @@ app.get('/health', (req: Request, res: Response) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 
-// Rota 404
+// Rota 404 - DEVE VIR POR ÚLTIMO
 app.use((req: Request, res: Response) => {
   res.status(404).json({
     success: false,
