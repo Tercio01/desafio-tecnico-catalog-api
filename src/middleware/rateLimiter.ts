@@ -1,9 +1,10 @@
-import rateLimit, { RateLimitRequestHandler, Options } from 'express-rate-limit';
+import rateLimit, { RateLimitRequestHandler } from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 import { createClient, RedisClientType } from 'redis';
 
 // Redis client for storing rate limit data
 let redisClient: RedisClientType | null = null;
+let isRedisConnected = false;
 
 /**
  * Initialize Redis client for rate limiting
@@ -18,12 +19,21 @@ export async function initializeRateLimitStore(): Promise<void> {
       },
     });
 
-    redisClient.on('error', (err) => console.error('Redis Client Error:', err));
-    redisClient.on('connect', () => console.log('✅ Redis connected for rate limiting'));
+    redisClient.on('error', (err) => {
+      console.warn('⚠️  Redis Error:', err.message);
+      isRedisConnected = false;
+    });
+    redisClient.on('connect', () => {
+      console.log('✅ Redis connected for rate limiting');
+      isRedisConnected = true;
+    });
 
     await redisClient.connect();
-  } catch (error) {
+    isRedisConnected = true;
+  } catch (error: any) {
     console.warn('⚠️  Redis not available, using memory store for rate limiting');
+    console.log('📌 Tip: Start Redis with: docker run -d -p 6379:6379 redis:latest');
+    isRedisConnected = false;
     redisClient = null;
   }
 }
@@ -32,13 +42,13 @@ export async function initializeRateLimitStore(): Promise<void> {
  * Get rate limit store (Redis or memory)
  */
 function getStore() {
-  if (redisClient) {
+  if (isRedisConnected && redisClient) {
     return new RedisStore({
       client: redisClient,
       prefix: 'rate-limit:',
     });
   }
-  // Falls back to memory store
+  // Falls back to memory store (no options needed for default memory store)
   return undefined;
 }
 
@@ -176,7 +186,7 @@ export const userSpecificLimiter = (
  * Gracefully close Redis connection
  */
 export async function closeRateLimitStore(): Promise<void> {
-  if (redisClient) {
+  if (isRedisConnected && redisClient) {
     await redisClient.quit();
     console.log('✅ Rate limit store closed');
   }
@@ -187,4 +197,11 @@ export async function closeRateLimitStore(): Promise<void> {
  */
 export function getRedisClient(): RedisClientType | null {
   return redisClient;
+}
+
+/**
+ * Check if Redis is connected
+ */
+export function isRateLimitRedisConnected(): boolean {
+  return isRedisConnected;
 }
