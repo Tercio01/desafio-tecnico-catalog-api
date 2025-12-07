@@ -94,6 +94,14 @@ Desafio técnico dividido em duas partes:
 
 ### 🎯 Acessar Documentação Interativa
 
+### 📸 Preview da Interface
+
+![Swagger UI - Catalog API](docs/images/swagger-ui-screenshot.png)
+
+*Interface interativa completa com autenticação JWT, modelos documentados e exemplos de request/response*
+
+---
+
 ```bash
 npm run dev
 
