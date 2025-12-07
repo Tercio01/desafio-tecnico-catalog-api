@@ -1,10 +1,16 @@
-import rateLimit, { RateLimitRequestHandler } from 'express-rate-limit';
+import rateLimit, { RateLimitRequestHandler, MemoryStore } from 'express-rate-limit';
+
+/**
+ * Memory store for rate limiting (default store)
+ */
+const memoryStore = new MemoryStore();
 
 /**
  * Global rate limiter - applies to all requests
  * 100 requests per 15 minutes per IP
  */
 export const globalLimiter: RateLimitRequestHandler = rateLimit({
+  store: memoryStore,
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
   message: {
@@ -31,6 +37,7 @@ export const globalLimiter: RateLimitRequestHandler = rateLimit({
  * 5 requests per 15 minutes per IP
  */
 export const authLimiter: RateLimitRequestHandler = rateLimit({
+  store: memoryStore,
   windowMs: 15 * 60 * 1000,
   max: 5,
   skipSuccessfulRequests: true, // Don't count successful requests
@@ -54,6 +61,7 @@ export const authLimiter: RateLimitRequestHandler = rateLimit({
  * 50 requests per 15 minutes per IP
  */
 export const apiLimiter: RateLimitRequestHandler = rateLimit({
+  store: memoryStore,
   windowMs: 15 * 60 * 1000,
   max: 50,
   message: {
@@ -76,6 +84,7 @@ export const apiLimiter: RateLimitRequestHandler = rateLimit({
  * 20 requests per 15 minutes per IP
  */
 export const createProductLimiter: RateLimitRequestHandler = rateLimit({
+  store: memoryStore,
   windowMs: 15 * 60 * 1000,
   max: 20,
   skip: (req) => req.method === 'GET', // Only apply to write operations
@@ -103,6 +112,7 @@ export const userSpecificLimiter = (
   max: number = 100
 ): RateLimitRequestHandler => {
   return rateLimit({
+    store: memoryStore,
     windowMs,
     max,
     keyGenerator: (req) => {
@@ -126,7 +136,7 @@ export const userSpecificLimiter = (
 };
 
 /**
- * Dummy async function for compatibility
+ * Async function for compatibility
  * Rate limiting is now handled by express-rate-limit memory store
  */
 export async function initializeRateLimitStore(): Promise<void> {
