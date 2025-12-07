@@ -21,16 +21,14 @@ dotenv.config();
 // Criar aplicação Express
 const app: Application = express();
 
-// Middlewares
+// Middlewares básicos
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ⚡️ RATE LIMITING - Global limiter (applies to all routes except /health)
-console.log('\n⚡️ Configurando rate limiting...');
 app.use(globalLimiter);
-console.log('✅ Rate limiting global ativado (100 req/15min)');
 
 // ⭐ SWAGGER DEVE VIR ANTES DAS ROTAS 404
 // Rota para JSON da especificação OpenAPI
@@ -123,31 +121,25 @@ process.on('SIGTERM', async () => {
 // Conectar ao banco e iniciar servidor
 const startServer = async () => {
   try {
-    console.log('\n🚀 Iniciando Catalog API...');
-    console.log('📝 Conectando ao MongoDB...');
     await connectDB();
     
     app.listen(PORT, () => {
       console.log(`\n✅ Servidor rodando na porta ${PORT}`);
-      console.log(`📍 URL: http://localhost:${PORT}`);
+      console.log(`📃 URL: http://localhost:${PORT}`);
       console.log(`📚 Documentação Swagger: http://localhost:${PORT}/api-docs`);
       console.log(`🔗 OpenAPI JSON: http://localhost:${PORT}/openapi.json`);
       console.log(`\n⚡️ RATE LIMITING ATIVADO:`);
       console.log(`   • Global: 100 req/15min por IP`);
       console.log(`   • Auth: 5 tentativas/15min`);
       console.log(`   • API: 50 req/15min por IP`);
-      console.log(`   • Write: 20 operações/15min por IP`);
-      console.log(`   • Storage: Memory (em desenvolvimento)`);
+      console.log(`   • Write: 20 operações/15min`);
       console.log(`\n📋 Endpoints disponíveis:`);
       console.log(`   - GET  / (Informações da API)`);
-      console.log(`   - GET  /health (Health check - sem rate limit)`);
-      console.log(`   - POST /api/auth/register (Taxa rigorosa)`);
-      console.log(`   - POST /api/auth/login (Taxa rigorosa)`);
-      console.log(`   - GET  /api/products (Rate limited)`);
-      console.log(`   - POST /api/products (Write limiter)`);
-      console.log(`\n💡 Teste rate limiting:`);
-      console.log(`   curl -v http://localhost:${PORT}/api/products`);
-      console.log(`   Procure por headers: RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset\n`);
+      console.log(`   - GET  /health (Health check)`);
+      console.log(`   - POST /api/auth/register`);
+      console.log(`   - POST /api/auth/login`);
+      console.log(`   - GET  /api/products`);
+      console.log(`   - POST /api/products\n`);
     });
   } catch (error) {
     console.error('❌ Erro ao iniciar servidor:', error);
