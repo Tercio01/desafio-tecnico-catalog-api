@@ -7,13 +7,8 @@ import connectDB from './config/database';
 import productRoutes from './routes/productRoutes';
 import authRoutes from './routes/authRoutes';
 import specs from './swagger';
-import {
-  closeRateLimitStore,
-  globalLimiter,
-  authLimiter,
-  apiLimiter,
-  createProductLimiter,
-} from './middleware/rateLimiter';
+import { closeRateLimitStore } from './middleware/rateLimiter';
+import { simpleRateLimiter } from './middleware/testRateLimit';
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -27,8 +22,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ⚡️ RATE LIMITING - Global limiter (applies to all routes except /health)
-app.use(globalLimiter);
+// ⚡️ RATE LIMITING - Manual test limiter
+app.use(simpleRateLimiter);
+console.log('⚡️ Rate limiting middleware ativado (teste manual)');
 
 // ⭐ SWAGGER DEVE VIR ANTES DAS ROTAS 404
 // Rota para JSON da especificação OpenAPI
@@ -65,7 +61,7 @@ app.get('/', (req: Request, res: Response) => {
     openapi: 'http://localhost:3000/openapi.json',
     rateLimiting: {
       enabled: true,
-      global: '100 requests per 15 minutes per IP',
+      global: '50 requests per 15 minutes per IP (TEST MODE)',
       auth: '5 failed attempts per 15 minutes',
       api: '50 requests per 15 minutes per IP',
       write: '20 write operations per 15 minutes'
@@ -87,12 +83,9 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
-// Rotas da API com rate limiting específicos
-// ⚡️ Auth routes - Strict rate limiting
-app.use('/api/auth', authLimiter, authRoutes);
-
-// ⚡️ Product routes - API + write operation limiters
-app.use('/api/products', apiLimiter, createProductLimiter, productRoutes);
+// Rotas da API
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
 
 // Rota 404 - DEVE VIR POR ÚLTIMO
 app.use((req: Request, res: Response) => {
@@ -128,18 +121,13 @@ const startServer = async () => {
       console.log(`📃 URL: http://localhost:${PORT}`);
       console.log(`📚 Documentação Swagger: http://localhost:${PORT}/api-docs`);
       console.log(`🔗 OpenAPI JSON: http://localhost:${PORT}/openapi.json`);
-      console.log(`\n⚡️ RATE LIMITING ATIVADO:`);
-      console.log(`   • Global: 100 req/15min por IP`);
-      console.log(`   • Auth: 5 tentativas/15min`);
-      console.log(`   • API: 50 req/15min por IP`);
-      console.log(`   • Write: 20 operações/15min`);
+      console.log(`\n⚡️ RATE LIMITING (TESTE MANUAL):`);
+      console.log(`   • Max: 50 req/15min por IP`);
+      console.log(`   • Storage: Memory`);
+      console.log(`\n🧪 Teste rate limiting:`);
+      console.log(`   for i in {1..55}; do curl -i http://localhost:3000/api/products; done`);
       console.log(`\n📋 Endpoints disponíveis:`);
-      console.log(`   - GET  / (Informações da API)`);
-      console.log(`   - GET  /health (Health check)`);
-      console.log(`   - POST /api/auth/register`);
-      console.log(`   - POST /api/auth/login`);
-      console.log(`   - GET  /api/products`);
-      console.log(`   - POST /api/products\n`);
+      console.log(`   - GET  /\n   - GET  /health\n   - GET  /api/products\n   - POST /api/products\n`);
     });
   } catch (error) {
     console.error('❌ Erro ao iniciar servidor:', error);
