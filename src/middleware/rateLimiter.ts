@@ -12,7 +12,7 @@ const createLimiter = (windowMs: number, max: number, message: string) => {
       res.status(429).json({
         status: 429,
         message: message,
-        retryAfter: req.rateLimit?.resetTime,
+        retryAfter: new Date(Date.now() + windowMs).toISOString(),
       });
     },
   });
@@ -42,7 +42,7 @@ export const authLimiter = rateLimit({
     res.status(429).json({
       status: 429,
       message: 'Too many authentication attempts. Please try again after 15 minutes.',
-      retryAfter: req.rateLimit?.resetTime,
+      retryAfter: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
     });
   },
 });
@@ -70,7 +70,7 @@ export const createProductLimiter = rateLimit({
     res.status(429).json({
       status: 429,
       message: 'Too many write requests. Please try again later.',
-      retryAfter: req.rateLimit?.resetTime,
+      retryAfter: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
     });
   },
 });
@@ -95,7 +95,7 @@ export const userSpecificLimiter = (
       res.status(429).json({
         status: 429,
         message: 'Rate limit exceeded. Please try again later.',
-        retryAfter: req.rateLimit?.resetTime,
+        retryAfter: new Date(Date.now() + windowMs).toISOString(),
       });
     },
   });
