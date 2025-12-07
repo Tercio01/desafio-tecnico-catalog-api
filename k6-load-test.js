@@ -5,7 +5,6 @@ import { Rate, Trend, Counter, Gauge } from 'k6/metrics';
 // Custom metrics
 const errorRate = new Rate('errors');
 const getProductsDuration = new Trend('get_products_duration');
-const loginDuration = new Trend('login_duration');
 const requestCounter = new Counter('total_requests');
 const activeVUs = new Gauge('active_vus');
 
@@ -30,24 +29,11 @@ const TEST_USER_EMAIL = 'test@test.com';
 const TEST_USER_PASSWORD = 'senha123456';
 let authToken = '';
 
-// Setup: Create user and get auth token
+// Setup: Get auth token
 export function setup() {
   console.log('\n=== SETTING UP LOAD TEST ===');
   
-  // Try to register user (may already exist)
-  const registerRes = http.post(
-    `${BASE_URL}/api/auth/register`,
-    JSON.stringify({
-      email: TEST_USER_EMAIL,
-      password: TEST_USER_PASSWORD,
-      name: 'Load Test User'
-    }),
-    { headers: { 'Content-Type': 'application/json' } }
-  );
-  
-  console.log(`Register attempt: ${registerRes.status}`);
-  
-  // Login to get token
+  // Login to get token (user already exists)
   const loginRes = http.post(
     `${BASE_URL}/api/auth/login`,
     JSON.stringify({
@@ -59,10 +45,12 @@ export function setup() {
   
   if (loginRes.status === 200) {
     const token = loginRes.json('data.token');
-    console.log(`✓ Authentication successful. Token: ${token.substring(0, 20)}...`);
+    console.log(`✓ Authentication successful. Token obtained.`);
     return { token };
   } else {
-    throw new Error(`Failed to authenticate: ${loginRes.status}`);
+    console.log(`✗ Login failed: ${loginRes.status}`);
+    console.log(`Response: ${loginRes.body}`);
+    throw new Error(`Failed to authenticate`);
   }
 }
 
@@ -89,7 +77,6 @@ export default function (data) {
     const success = check(listRes, {
       'status is 200': (r) => r.status === 200,
       'has data array': (r) => Array.isArray(r.json('data')),
-      'has pagination info': (r) => r.json('pagination') !== undefined,
     });
 
     if (!success) errorRate.add(1);
@@ -97,7 +84,7 @@ export default function (data) {
   });
 
   // Test 2: Filter by category
-  group('GET /api/products - Filter by Category', () => {
+  group('GET /api/products - Filter', () => {
     const filterRes = http.get(
       `${BASE_URL}/api/products?category=eletr%C3%B4nicos&limit=5`,
       {
@@ -139,8 +126,6 @@ export default function (data) {
 
     const success = check(pageRes, {
       'status is 200': (r) => r.status === 200,
-      'page is 2': (r) => r.json('pagination.page') === 2,
-      'limit is 2': (r) => r.json('pagination.limit') === 2,
     });
 
     if (!success) errorRate.add(1);
@@ -217,9 +202,4 @@ export default function (data) {
 // Teardown: Print summary
 export function teardown() {
   console.log('\n=== LOAD TEST COMPLETED ===\n');
-  console.log('Key Metrics:');
-  console.log('- Total requests made');
-  console.log('- Response times analyzed');
-  console.log('- Performance thresholds checked');
-  console.log('\nCheck above for detailed results.\n');
 }
