@@ -8,9 +8,7 @@ import productRoutes from './routes/productRoutes';
 import authRoutes from './routes/authRoutes';
 import specs from './swagger';
 import {
-  initializeRateLimitStore,
   closeRateLimitStore,
-  isRateLimitRedisConnected,
   globalLimiter,
   authLimiter,
   apiLimiter,
@@ -30,7 +28,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ⚡️ RATE LIMITING - Global limiter (applies to all routes except /health)
+console.log('\n⚡️ Configurando rate limiting...');
 app.use(globalLimiter);
+console.log('✅ Rate limiting global ativado (100 req/15min)');
 
 // ⭐ SWAGGER DEVE VIR ANTES DAS ROTAS 404
 // Rota para JSON da especificação OpenAPI
@@ -67,10 +67,9 @@ app.get('/', (req: Request, res: Response) => {
     openapi: 'http://localhost:3000/openapi.json',
     rateLimiting: {
       enabled: true,
-      redisConnected: isRateLimitRedisConnected(),
       global: '100 requests per 15 minutes per IP',
       auth: '5 failed attempts per 15 minutes',
-      api: '50 requests per 15 minutes per user',
+      api: '50 requests per 15 minutes per IP',
       write: '20 write operations per 15 minutes'
     },
     endpoints: {
@@ -86,8 +85,7 @@ app.get('/health', (req: Request, res: Response) => {
     success: true,
     status: 'OK',
     timestamp: new Date().toISOString(),
-    rateLimitingStatus: 'active',
-    redisConnected: isRateLimitRedisConnected()
+    rateLimitingStatus: 'active'
   });
 });
 
@@ -126,32 +124,30 @@ process.on('SIGTERM', async () => {
 const startServer = async () => {
   try {
     console.log('\n🚀 Iniciando Catalog API...');
-    console.log('⚡️ Configurando rate limiting...');
-    
-    // Initialize rate limit store (Redis or memory fallback)
-    await initializeRateLimitStore();
-    
-    console.log('📃 Conectando ao MongoDB...');
+    console.log('📝 Conectando ao MongoDB...');
     await connectDB();
     
     app.listen(PORT, () => {
-      console.log(`\n🚀 Servidor rodando na porta ${PORT}`);
-      console.log(`📃 URL: http://localhost:${PORT}`);
+      console.log(`\n✅ Servidor rodando na porta ${PORT}`);
+      console.log(`📍 URL: http://localhost:${PORT}`);
       console.log(`📚 Documentação Swagger: http://localhost:${PORT}/api-docs`);
       console.log(`🔗 OpenAPI JSON: http://localhost:${PORT}/openapi.json`);
       console.log(`\n⚡️ RATE LIMITING ATIVADO:`);
       console.log(`   • Global: 100 req/15min por IP`);
-      console.log(`   • Auth: 5 tenta/15min`);
-      console.log(`   • API: 50 req/15min`);
-      console.log(`   • Write: 20 op/15min`);
-      console.log(`   • Storage: ${isRateLimitRedisConnected() ? 'Redis' : 'Memory'}`);
+      console.log(`   • Auth: 5 tentativas/15min`);
+      console.log(`   • API: 50 req/15min por IP`);
+      console.log(`   • Write: 20 operações/15min por IP`);
+      console.log(`   • Storage: Memory (em desenvolvimento)`);
       console.log(`\n📋 Endpoints disponíveis:`);
       console.log(`   - GET  / (Informações da API)`);
-      console.log(`   - GET  /health (Health check)`);
-      console.log(`   - POST /api/auth/register (Registrar usuário)`);
-      console.log(`   - POST /api/auth/login (Login)`);
-      console.log(`   - GET  /api/products (Listar produtos)`);
-      console.log(`   - POST /api/products (Criar produto - Admin)`);
+      console.log(`   - GET  /health (Health check - sem rate limit)`);
+      console.log(`   - POST /api/auth/register (Taxa rigorosa)`);
+      console.log(`   - POST /api/auth/login (Taxa rigorosa)`);
+      console.log(`   - GET  /api/products (Rate limited)`);
+      console.log(`   - POST /api/products (Write limiter)`);
+      console.log(`\n💡 Teste rate limiting:`);
+      console.log(`   curl -v http://localhost:${PORT}/api/products`);
+      console.log(`   Procure por headers: RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset\n`);
     });
   } catch (error) {
     console.error('❌ Erro ao iniciar servidor:', error);
