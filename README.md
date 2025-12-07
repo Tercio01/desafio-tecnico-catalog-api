@@ -582,4 +582,3 @@ k6 run tests/load-test.js
 
 **Desenvolvido com ❤️ para demonstrar excelência em engenharia de software.**
 
-**Status**: ✅ **Pronto para Produção** | **Avaliação**: 9.2/10
