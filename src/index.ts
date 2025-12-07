@@ -10,6 +10,7 @@ import specs from './swagger';
 import {
   initializeRateLimitStore,
   closeRateLimitStore,
+  isRateLimitRedisConnected,
   globalLimiter,
   authLimiter,
   apiLimiter,
@@ -66,6 +67,7 @@ app.get('/', (req: Request, res: Response) => {
     openapi: 'http://localhost:3000/openapi.json',
     rateLimiting: {
       enabled: true,
+      redisConnected: isRateLimitRedisConnected(),
       global: '100 requests per 15 minutes per IP',
       auth: '5 failed attempts per 15 minutes',
       api: '50 requests per 15 minutes per user',
@@ -84,7 +86,8 @@ app.get('/health', (req: Request, res: Response) => {
     success: true,
     status: 'OK',
     timestamp: new Date().toISOString(),
-    rateLimitingStatus: 'active'
+    rateLimitingStatus: 'active',
+    redisConnected: isRateLimitRedisConnected()
   });
 });
 
@@ -122,9 +125,13 @@ process.on('SIGTERM', async () => {
 // Conectar ao banco e iniciar servidor
 const startServer = async () => {
   try {
+    console.log('\n🚀 Iniciando Catalog API...');
+    console.log('⚡️ Configurando rate limiting...');
+    
     // Initialize rate limit store (Redis or memory fallback)
     await initializeRateLimitStore();
     
+    console.log('📃 Conectando ao MongoDB...');
     await connectDB();
     
     app.listen(PORT, () => {
@@ -137,6 +144,7 @@ const startServer = async () => {
       console.log(`   • Auth: 5 tenta/15min`);
       console.log(`   • API: 50 req/15min`);
       console.log(`   • Write: 20 op/15min`);
+      console.log(`   • Storage: ${isRateLimitRedisConnected() ? 'Redis' : 'Memory'}`);
       console.log(`\n📋 Endpoints disponíveis:`);
       console.log(`   - GET  / (Informações da API)`);
       console.log(`   - GET  /health (Health check)`);
