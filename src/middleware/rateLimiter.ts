@@ -1,63 +1,10 @@
 import rateLimit, { RateLimitRequestHandler } from 'express-rate-limit';
-import RedisStore from 'rate-limit-redis';
-import { createClient, RedisClientType } from 'redis';
-
-// Redis client for storing rate limit data
-let redisClient: RedisClientType | null = null;
-let isRedisConnected = false;
-
-/**
- * Initialize Redis client for rate limiting
- * Falls back to memory store if Redis is unavailable
- */
-export async function initializeRateLimitStore(): Promise<void> {
-  try {
-    redisClient = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
-      socket: {
-        reconnectStrategy: (retries) => Math.min(retries * 50, 500),
-      },
-    });
-
-    redisClient.on('error', (err) => {
-      console.warn('⚠️  Redis Error:', err.message);
-      isRedisConnected = false;
-    });
-    redisClient.on('connect', () => {
-      console.log('✅ Redis connected for rate limiting');
-      isRedisConnected = true;
-    });
-
-    await redisClient.connect();
-    isRedisConnected = true;
-  } catch (error: any) {
-    console.warn('⚠️  Redis not available, using memory store for rate limiting');
-    console.log('📌 Tip: Start Redis with: docker run -d -p 6379:6379 redis:latest');
-    isRedisConnected = false;
-    redisClient = null;
-  }
-}
-
-/**
- * Get rate limit store (Redis or memory)
- */
-function getStore() {
-  if (isRedisConnected && redisClient) {
-    return new RedisStore({
-      client: redisClient,
-      prefix: 'rate-limit:',
-    });
-  }
-  // Falls back to memory store (no options needed for default memory store)
-  return undefined;
-}
 
 /**
  * Global rate limiter - applies to all requests
  * 100 requests per 15 minutes per IP
  */
 export const globalLimiter: RateLimitRequestHandler = rateLimit({
-  store: getStore() as any,
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
   message: {
@@ -84,7 +31,6 @@ export const globalLimiter: RateLimitRequestHandler = rateLimit({
  * 5 requests per 15 minutes per IP
  */
 export const authLimiter: RateLimitRequestHandler = rateLimit({
-  store: getStore() as any,
   windowMs: 15 * 60 * 1000,
   max: 5,
   skipSuccessfulRequests: true, // Don't count successful requests
@@ -105,10 +51,9 @@ export const authLimiter: RateLimitRequestHandler = rateLimit({
 
 /**
  * API endpoints rate limiter
- * 50 requests per 15 minutes per IP (for logged-in users)
+ * 50 requests per 15 minutes per IP
  */
 export const apiLimiter: RateLimitRequestHandler = rateLimit({
-  store: getStore() as any,
   windowMs: 15 * 60 * 1000,
   max: 50,
   message: {
@@ -131,7 +76,6 @@ export const apiLimiter: RateLimitRequestHandler = rateLimit({
  * 20 requests per 15 minutes per IP
  */
 export const createProductLimiter: RateLimitRequestHandler = rateLimit({
-  store: getStore() as any,
   windowMs: 15 * 60 * 1000,
   max: 20,
   skip: (req) => req.method === 'GET', // Only apply to write operations
@@ -159,7 +103,6 @@ export const userSpecificLimiter = (
   max: number = 100
 ): RateLimitRequestHandler => {
   return rateLimit({
-    store: getStore() as any,
     windowMs,
     max,
     keyGenerator: (req) => {
@@ -183,25 +126,23 @@ export const userSpecificLimiter = (
 };
 
 /**
- * Gracefully close Redis connection
+ * Dummy async function for compatibility
+ * Rate limiting is now handled by express-rate-limit memory store
+ */
+export async function initializeRateLimitStore(): Promise<void> {
+  console.log('⚡️ Rate limiting initialized (memory store)');
+}
+
+/**
+ * Gracefully close rate limit store
  */
 export async function closeRateLimitStore(): Promise<void> {
-  if (isRedisConnected && redisClient) {
-    await redisClient.quit();
-    console.log('✅ Rate limit store closed');
-  }
+  console.log('✅ Rate limit store closed');
 }
 
 /**
- * Export Redis client for direct use if needed
- */
-export function getRedisClient(): RedisClientType | null {
-  return redisClient;
-}
-
-/**
- * Check if Redis is connected
+ * Check if Redis is connected (always false now)
  */
 export function isRateLimitRedisConnected(): boolean {
-  return isRedisConnected;
+  return false;
 }
