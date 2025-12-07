@@ -9,6 +9,20 @@ Este repositório contém a solução completa para o **Desafio Técnico de Enge
 
 ---
 
+## ⚡ Quick Start
+
+Get running in 2 minutes:
+
+git clone https://github.com/Tercio01/desafio-tecnico-catalog-api.git
+cd desafio-tecnico-catalog-api
+docker-compose up --build
+curl http://localhost:3000/health
+
+text
+
+API running at http://localhost:3000 🚀
+
+
 ## 📋 Índice
 
 - [Sobre o Desafio](#sobre-o-desafio)
