@@ -7,6 +7,7 @@ export interface IProduct extends Document {
   category: string;
   sku: string;
   stock: number;
+  active?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,8 +33,12 @@ const ProductSchema: Schema = new Schema(
     category: {
       type: String,
       required: [true, 'Categoria é obrigatória'],
-      enum: ['eletrônicos', 'roupas', 'alimentos', 'livros', 'outros'],
-      lowercase: true
+      enum: {
+        values: ['eletrônicos', 'roupas', 'alimentos', 'livros', 'outros'],
+        message: 'Categoria inválida. Use: eletrônicos, roupas, alimentos, livros ou outros'
+      },
+      lowercase: true,
+      trim: true
     },
     sku: {
       type: String,
@@ -47,6 +52,10 @@ const ProductSchema: Schema = new Schema(
       required: [true, 'Estoque é obrigatório'],
       min: [0, 'Estoque não pode ser negativo'],
       default: 0
+    },
+    active: {
+      type: Boolean,
+      default: true
     }
   },
   {
@@ -54,9 +63,18 @@ const ProductSchema: Schema = new Schema(
   }
 );
 
-// Índices para melhor performance
+// ===== ÍNDICES PARA PERFORMANCE E FUNCIONALIDADE =====
+
+// Text index para busca por nome e descrição
 ProductSchema.index({ name: 'text', description: 'text' });
+
+// Performance indexes para queries comuns
 ProductSchema.index({ category: 1 });
-ProductSchema.index({ sku: 1 });
+ProductSchema.index({ price: 1 });
+ProductSchema.index({ createdAt: -1 });
+ProductSchema.index({ active: 1 });
+
+// SKU já tem unique: true, mas reforçamos
+ProductSchema.index({ sku: 1 }, { unique: true });
 
 export default mongoose.model<IProduct>('Product', ProductSchema);
