@@ -36,7 +36,7 @@ npm run dev
 |----------------|--------|---------------|
 | ✅ CRUD Produtos | Completo | [API Docs](http://localhost:3000/api-docs) |
 | ✅ Autenticação JWT | Completo | [Swagger](docs/SWAGGER_DOCUMENTATION.md) |
-| ✅ Paginação & Filtros | Completo | [Endpoints](#endpoints-da-api) |
+| ✅ Paginação & Filtros | Completo | [Endpoints Swagger](#-endpoints-da-api) |
 | ✅ Rate Limiting | **Implementado** | [Rate Limiting Guide](docs/RATE_LIMITING.md) |
 | ✅ Docker | Completo | [docker-compose.yml](docker-compose.yml) |
 | ✅ Swagger/OpenAPI | Completo | [SWAGGER_DOCUMENTATION.md](docs/SWAGGER_DOCUMENTATION.md) |
@@ -56,7 +56,7 @@ npm run dev
 - [Tecnologias Utilizadas](#-tecnologias-utilizadas)
 - [Instalação e Execução](#-instalação-e-execução)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Endpoints da API](#-endpoints-da-api)
+- [🔌 Endpoints da API](#-endpoints-da-api)
 - [🧪 Testes](#-testes)
 - [🏗️ Parte 2: Arquitetura](#-parte-2-arquitetura)
 - [Autor](#-autor)
@@ -94,14 +94,6 @@ Desafio técnico dividido em duas partes:
 
 ### 🎯 Acessar Documentação Interativa
 
-### 📸 Preview da Interface
-
-![Swagger UI - Catalog API](docs/images/swagger-ui-screenshot.png)
-
-*Interface interativa completa com autenticação JWT, modelos documentados e exemplos de request/response*
-
----
-
 ```bash
 npm run dev
 
@@ -112,7 +104,7 @@ http://localhost:3000/api-docs
 ### 📚 Recursos Disponíveis
 
 | Recurso | URL | Descrição |
-|---------|-----|-------------|
+|---------|-----|----------|
 | **Swagger UI** | http://localhost:3000/api-docs | Interface interativa para testar endpoints |
 | **OpenAPI JSON** | http://localhost:3000/openapi.json | Especificação OpenAPI 3.0 em JSON |
 | **Documentação Completa** | [docs/SWAGGER_DOCUMENTATION.md](docs/SWAGGER_DOCUMENTATION.md) | Guia detalhado da API |
@@ -355,6 +347,8 @@ catalog-api/
 http://localhost:3000/api-docs
 ```
 
+📚 **Documentação completa em:** [docs/SWAGGER_DOCUMENTATION.md](docs/SWAGGER_DOCUMENTATION.md)
+
 ### Autenticação
 
 #### Registrar Usuário
@@ -445,6 +439,8 @@ npm test -- --coverage
 npm test -- --watch
 ```
 
+📚 **Documentação completa em:** [TEST_COVERAGE.md](TEST_COVERAGE.md)
+
 ### Load Testing com k6
 
 ```bash
@@ -516,6 +512,9 @@ Solução completa para **100 mil usuários simultâneos**:
 | **Rate Limiting Guide** | Configuração e uso de rate limiting | [RATE_LIMITING.md](docs/RATE_LIMITING.md) |
 | **Load Testing Report** | Resultados detalhados k6 | [load-testing-report.md](docs/load-testing-report.md) |
 | **AWS Architecture** | Arquitetura para 100k usuários | [ARCHITECTURE-AWS.md](docs/ARCHITECTURE-AWS.md) |
+| **Test Coverage** | Documentação de testes e cobertura | [TEST_COVERAGE.md](TEST_COVERAGE.md) |
+| **Deployment Guide** | Guia completo de deployment | [DEPLOYMENT.md](DEPLOYMENT.md) |
+| **Contributing** | Guia para contribuidores | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 ---
 
@@ -589,4 +588,3 @@ k6 run tests/load-test.js
 ---
 
 **Desenvolvido com ❤️ para demonstrar excelência em engenharia de software.**
-
