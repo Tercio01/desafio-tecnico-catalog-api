@@ -136,7 +136,7 @@ Desafio técnico dividido em duas partes:
 ### 🚨 Reportar Vulnerabilidades
 
 Para reportar vulnerabilidades de segurança, **NÃO abra issues públicas**.
-Contate: `security@your-domain.com`
+Contate: `tercio1parente@gmail.com
 
 ---
 
@@ -627,7 +627,7 @@ k6 run tests/load-test.js
 
 ### Como reportar vulnerabilidades de segurança?
 
-**NÃO abra issues públicas.** Envie email para `security@your-domain.com`
+**NÃO abra issues públicas.** Envie email para 'tercio1parente@gmail.com'
 
 Veja mais em [SECURITY.md](docs/SECURITY.md)
 
