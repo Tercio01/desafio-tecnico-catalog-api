@@ -575,7 +575,7 @@ Solução completa para **100 mil usuários simultâneos**:
 **Tercio Alves Parente**
 - GitHub: [@Tercio01](https://github.com/Tercio01)
 - LinkedIn: [Tercio Alves Parente](https://www.linkedin.com/in/tercioparente)
-- Email: tercio.parente@example.com
+- Email: tercio1parente@gmail.com.com
 
 ---
 
