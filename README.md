@@ -7,6 +7,7 @@
 [![Swagger](https://img.shields.io/badge/Swagger-OpenAPI%203.0-brightgreen)](https://swagger.io/)
 [![Rate Limiting](https://img.shields.io/badge/Rate%20Limiting-✅%20Implemented-success)](docs/RATE_LIMITING.md)
 [![K6 Load Test](https://img.shields.io/badge/K6%20Load%20Test-9.2%2F10-brightgreen)](docs/load-testing-report.md)
+[![Security](https://img.shields.io/badge/Security-✅%20Rotated-brightgreen)](docs/SECURITY.md)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 API REST completa para gerênciamento de catálogo de produtos, desenvolvida com **Node.js**, **TypeScript**, **Express**, **MongoDB**, **JWT**, **Rate Limiting**, documentação **Swagger/OpenAPI**, e testes de carga validados.
@@ -43,6 +44,7 @@ npm run dev
 | ✅ Load Testing (k6) | **Validado** | [Load Test Report](docs/load-testing-report.md) |
 | ✅ CI/CD Pipeline | Completo | [.github/workflows](.github/workflows) |
 | ✅ Arquitetura AWS | Completo | [ARCHITECTURE-AWS.md](docs/ARCHITECTURE-AWS.md) |
+| ✅ Segurança | **Rotated** | [SECURITY.md](docs/SECURITY.md) |
 
 ---
 
@@ -50,6 +52,7 @@ npm run dev
 
 - [Sobre o Desafio](#-sobre-o-desafio)
 - [⚡ Quick Start](#-quick-start)
+- [🔒 Segurança](#-segurança)
 - [📚 Documentação Swagger](#-documentação-swagger)
 - [⚡ Rate Limiting](#-rate-limiting)
 - [📊 Load Testing Results](#-load-testing-results)
@@ -87,6 +90,53 @@ Desafio técnico dividido em duas partes:
 - Alta disponibilidade (Multi-AZ)
 - Auto Scaling
 - Observabilidade (CloudWatch + X-Ray)
+
+---
+
+## 🔒 Segurança
+
+### Status: ✅ Credenciais Rotacionadas (Dec 8, 2025)
+
+**O projeto implementa segurança em múltiplos níveis:**
+
+```
+✅ MongoDB credentials rotacionadas
+✅ JWT secret em variáveis de ambiente
+✅ Passwords hasheadas com bcryptjs
+✅ Rate limiting 4 níveis
+✅ CORS configurado
+✅ Input validation
+✅ Security headers (Helmet)
+✅ GitHub secret scanning ativado
+```
+
+### 🔐 Práticas de Segurança Implementadas
+
+| Prática | Status | Detalhe |
+|---------|--------|----------|
+| **Env Variables** | ✅ | Todas as credenciais em `.env` (não commitado) |
+| **JWT Secret** | ✅ | Armazenado em variável de ambiente |
+| **Password Hashing** | ✅ | bcryptjs com 10 salt rounds |
+| **Credential Rotation** | ✅ | MongoDB user rotacionado Dec 8 |
+| **Rate Limiting** | ✅ | 4 níveis de proteção |
+| **CORS** | ✅ | Restrito a origins específicas |
+| **Input Validation** | ✅ | Schema validation com Zod |
+| **Security Headers** | ✅ | Helmet.js configurado |
+| **Secret Scanning** | ✅ | GitHub detecta credentials expostas |
+
+### 📚 Documentação de Segurança
+
+🔗 **[docs/SECURITY.md](docs/SECURITY.md)** - Guia completo:
+- Credential rotation log
+- Best practices detalhadas
+- Incident response procedures
+- Security checklist
+- Referências OWASP
+
+### 🚨 Reportar Vulnerabilidades
+
+Para reportar vulnerabilidades de segurança, **NÃO abra issues públicas**.
+Contate: `security@your-domain.com`
 
 ---
 
@@ -324,6 +374,7 @@ catalog-api/
 ├── docs/
 │   ├── SWAGGER_DOCUMENTATION.md # Guia Swagger completo
 │   ├── RATE_LIMITING.md         # Documentação Rate Limiting
+│   ├── SECURITY.md              # Guia de segurança
 │   ├── load-testing-report.md   # Relatório k6
 │   ├── ARCHITECTURE-AWS.md      # Arquitetura Parte 2
 │   └── Desafio-Arquitetura-AWS.pdf
@@ -509,6 +560,7 @@ Solução completa para **100 mil usuários simultâneos**:
 | Documento | Descrição | Link |
 |-----------|-------------|------|
 | **Swagger Documentation** | Guia completo da API Swagger | [SWAGGER_DOCUMENTATION.md](docs/SWAGGER_DOCUMENTATION.md) |
+| **Security Guide** | Práticas de segurança e credential rotation | [SECURITY.md](docs/SECURITY.md) |
 | **Rate Limiting Guide** | Configuração e uso de rate limiting | [RATE_LIMITING.md](docs/RATE_LIMITING.md) |
 | **Load Testing Report** | Resultados detalhados k6 | [load-testing-report.md](docs/load-testing-report.md) |
 | **AWS Architecture** | Arquitetura para 100k usuários | [ARCHITECTURE-AWS.md](docs/ARCHITECTURE-AWS.md) |
@@ -573,6 +625,12 @@ sudo apt-get install k6
 k6 run tests/load-test.js
 ```
 
+### Como reportar vulnerabilidades de segurança?
+
+**NÃO abra issues públicas.** Envie email para `security@your-domain.com`
+
+Veja mais em [SECURITY.md](docs/SECURITY.md)
+
 ---
 
 ## ⭐ Destaques do Projeto
@@ -580,7 +638,7 @@ k6 run tests/load-test.js
 - ✅ **Pontuação k6**: 9.2/10 (performance excepcional)
 - ✅ **Rate Limiting**: Proteção contra abuso implementada
 - ✅ **Documentação**: 100% dos endpoints documentados com Swagger
-- ✅ **Segurança**: JWT + bcrypt + helmet + rate limiting
+- ✅ **Segurança**: JWT + bcrypt + helmet + rate limiting + **credential rotation**
 - ✅ **Arquitetura**: Solução completa para 100k usuários
 - ✅ **Docker**: Containerização completa
 - ✅ **TypeScript**: Type-safe com cobertura completa
