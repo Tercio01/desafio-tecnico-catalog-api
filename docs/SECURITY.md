@@ -179,7 +179,7 @@ Quarterly:
 ## 📞 Security Contact
 
 For security vulnerabilities, please email:
-`security@your-domain.com`
+`tercio1parente@gmail.com`
 
 Do NOT open public issues for security vulnerabilities!
 
