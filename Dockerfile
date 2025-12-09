@@ -13,8 +13,8 @@ RUN npm ci --only=production
 # Copy source code
 COPY src ./src
 
-# Build TypeScript
-RUN npx tsc || echo "No build needed"
+# Build TypeScript (ignore error if no tsconfig)
+RUN npx tsc || true
 
 # Production stage
 FROM node:20-alpine
@@ -32,9 +32,11 @@ RUN addgroup -g 1001 -S nodejs && \
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 
-# Copy application files
+# Copy built files (if exist)
+COPY --from=builder /app/dist ./dist* || true
+
+# Copy source code
 COPY src ./src
-COPY --from=builder /app/dist ./dist 2>/dev/null || true
 
 # Create logs directory
 RUN mkdir -p logs && chown -R nodejs:nodejs logs
