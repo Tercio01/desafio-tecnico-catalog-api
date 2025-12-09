@@ -14,6 +14,26 @@ services:
       - mongodb_data:/data/db
     networks:
       - catalog-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: catalog-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - catalog-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # API Application
   api:
@@ -27,11 +47,15 @@ services:
     environment:
       PORT: 3000
       MONGODB_URI: mongodb://mongodb:27017/catalog
-      JWT_SECRET: ${JWT_SECRET:-seu_jwt_secret_super_seguro_aqui_altere_em_producao_2024}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: 24h
-      NODE_ENV: production
+      NODE_ENV: development
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - catalog-network
 
