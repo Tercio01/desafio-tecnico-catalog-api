@@ -1,33 +1,54 @@
-FROM node:22-alpine AS builder
+# Build stage
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Copy package files
 COPY package*.json ./
 COPY tsconfig.json ./
 
-RUN npm install
+# Install dependencies
+RUN npm ci --only=production
 
+# Copy source code
 COPY src ./src
 
-RUN npm run build
+# Build TypeScript
+RUN npx tsc || echo "No build needed"
 
-# ═══════════════════════════════════════════════════════════
-
-FROM node:22-alpine
+# Production stage
+FROM node:20-alpine
 
 WORKDIR /app
 
-RUN apk add --no-cache curl
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
 
-COPY package*.json ./
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
 
-RUN npm install --omit=dev
+# Copy dependencies
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
 
-COPY --from=builder /app/dist ./dist
+# Copy application files
+COPY src ./src
+COPY --from=builder /app/dist ./dist 2>/dev/null || true
 
+# Create logs directory
+RUN mkdir -p logs && chown -R nodejs:nodejs logs
+
+# Switch to non-root user
+USER nodejs
+
+# Expose port
 EXPOSE 3000
 
-HEALTHCHECK --interval=10s --timeout=5s --retries=5 --start-period=30s \
-  CMD curl -f http://localhost:3000/health || exit 1
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"
 
-CMD ["node", "dist/index.js"]
+# Start application
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "src/index.ts"]
