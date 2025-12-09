@@ -307,6 +307,7 @@ MIT License - veja [LICENSE](LICENSE) para detalhes.
 
 **Tercio Parente**
 - GitHub: [@Tercio01](https://github.com/Tercio01)
+- Email: [tercio1parente@gmail.com](mailto:tercio1parente@gmail.com)
 
 ---
 
