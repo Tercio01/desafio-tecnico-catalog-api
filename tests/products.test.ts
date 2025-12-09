@@ -27,29 +27,29 @@ describe('Product Model', () => {
         stock: 10
       });
 
-      expect(async () => {
-        await Product.create({
+      await expect(
+        Product.create({
           name: 'Product 2',
           description: 'Test',
           price: 99.99,
           category: 'eletrônicos',
           sku: 'UNIQUE-SKU-001',
           stock: 10
-        });
-      }).rejects.toThrow();
+        })
+      ).rejects.toThrow();
     });
 
     it('should validate category enum', async () => {
-      expect(async () => {
-        await Product.create({
+      await expect(
+        Product.create({
           name: 'Invalid Category',
           description: 'Test',
           price: 99.99,
           category: 'invalid-category',
           sku: 'INVALID-001',
           stock: 10
-        });
-      }).rejects.toThrow();
+        })
+      ).rejects.toThrow();
     });
   });
 
