@@ -6,7 +6,11 @@ import swaggerUi from 'swagger-ui-express';
 import connectDB from './config/database';
 import productRoutes from './routes/productRoutes';
 import authRoutes from './routes/authRoutes';
+import metricsRoutes from './routes/metricsRoutes';
 import specs from './swagger';
+import { logger } from './utils/logger';
+import { initDatabaseMonitoring } from './utils/databaseMonitoring';
+import healthRouter from './routes/health';
 import {
   closeRateLimitStore,
   globalLimiter,
@@ -21,131 +25,92 @@ dotenv.config();
 // Criar aplicação Express
 const app: Application = express();
 
-// Middlewares básicos
+// Middleware de segurança
 app.use(helmet());
 app.use(cors());
+
+// Middleware de logging estruturado
+app.use((req, res, next) => {
+  const requestId = (req.headers['x-request-id'] as string) || Date.now().toString();
+  
+  logger.setContext({
+    requestId,
+    endpoint: req.path,
+    method: req.method
+  });
+
+  const startTime = Date.now();
+  
+  res.on('finish', () => {
+    logger.info('REQUEST_COMPLETE', {
+      statusCode: res.statusCode,
+      duration: Date.now() - startTime
+    });
+  });
+
+  next();
+});
+
+// Health check route
+app.use('/api', healthRouter);
+
+// Body parser middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ⚡️ RATE LIMITING - Global limiter (applies to all routes)
+// Connect to database
+connectDB();
+initDatabaseMonitoring();
+
+// Rate limiting
 app.use(globalLimiter);
 
-// ⭐ SWAGGER DEVE VIR ANTES DAS ROTAS 404
-// Rota para JSON da especificação OpenAPI
-app.get('/openapi.json', (req: Request, res: Response) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.send(specs);
-});
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
-// Swagger UI - ANTES das rotas protegidas
-app.use(
-  '/api-docs',
-  swaggerUi.serve,
-  swaggerUi.setup(specs, {
-    swaggerOptions: {
-      persistAuthorization: true,
-      displayOperationId: true,
-      filter: true,
-      showExtensions: true,
-      defaultModelsExpandDepth: 1,
-      defaultModelExpandDepth: 1
-    },
-    customCss: `.swagger-ui .topbar { display: none }`,
-    customSiteTitle: 'Catalog API - Swagger UI'
-  })
-);
-
-// Rotas principais
-app.get('/', (req: Request, res: Response) => {
-  res.json({
-    success: true,
-    message: '🚀 API Catálogo de Produtos - Funcionando!',
-    version: '1.0.0',
-    documentation: 'http://localhost:3000/api-docs',
-    openapi: 'http://localhost:3000/openapi.json',
-    rateLimiting: {
-      enabled: true,
-      global: '100 requests per 15 minutes per IP',
-      auth: '5 failed attempts per 15 minutes',
-      api: '50 requests per 15 minutes per IP',
-      write: '20 write operations per 15 minutes'
-    },
-    endpoints: {
-      auth: '/api/auth',
-      products: '/api/products',
-      health: '/health'
-    }
-  });
-});
-
+// Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
-  res.json({
-    success: true,
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    rateLimitingStatus: 'active'
-  });
+  res.json({ status: 'ok', message: 'Server is running' });
 });
 
-// Rotas da API com rate limiting específicos
-// ⚡️ Auth routes - Strict rate limiting
+// Routes
 app.use('/api/auth', authLimiter, authRoutes);
-
-// ⚡️ Product routes - API + write operation limiters
+app.use('/api/metrics', metricsRoutes);
 app.use('/api/products', apiLimiter, createProductLimiter, productRoutes);
 
-// Rota 404 - DEVE VIR POR ÚLTIMO
-app.use((req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    message: 'Rota não encontrada'
+// Error handling middleware
+app.use((err: any, req: Request, res: Response, next: Function) => {
+  logger.error('UNHANDLED_ERROR', {
+    name: err.name || "Error",
+    message: err.message,
+    stack: err.stack
+  });
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+
+const server = app.listen(PORT, () => {
+  logger.info('SERVER_STARTED', { port: PORT });
+  console.log(`✓ Server running at http://localhost:${PORT}`);
+  console.log(`✓ API Docs available at http://localhost:${PORT}/api-docs`);
+  console.log(`✓ Health check at http://localhost:${PORT}/health`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  logger.info('SIGTERM_RECEIVED');
+  server.close(async () => {
+    await closeRateLimitStore();
+    process.exit(0);
   });
 });
 
-// Porta
-const PORT = process.env.PORT || 3000;
-
-// Graceful shutdown
 process.on('SIGINT', async () => {
-  console.log('\n🚫 Encerrando servidor...');
-  await closeRateLimitStore();
-  process.exit(0);
+  logger.info('SIGINT_RECEIVED');
+  server.close(async () => {
+    await closeRateLimitStore();
+    process.exit(0);
+  });
 });
-
-process.on('SIGTERM', async () => {
-  console.log('\n🚫 Encerrando servidor...');
-  await closeRateLimitStore();
-  process.exit(0);
-});
-
-// Conectar ao banco e iniciar servidor
-const startServer = async () => {
-  try {
-    await connectDB();
-    
-    app.listen(PORT, () => {
-      console.log(`\n✅ Servidor rodando na porta ${PORT}`);
-      console.log(`📃 URL: http://localhost:${PORT}`);
-      console.log(`📚 Documentação Swagger: http://localhost:${PORT}/api-docs`);
-      console.log(`🔗 OpenAPI JSON: http://localhost:${PORT}/openapi.json`);
-      console.log(`\n⚡️ RATE LIMITING ATIVADO:`);
-      console.log(`   • Global: 100 req/15min por IP`);
-      console.log(`   • Auth: 5 tentativas/15min`);
-      console.log(`   • API: 50 req/15min por IP`);
-      console.log(`   • Write: 20 operações/15min`);
-      console.log(`   • Storage: Memory (em desenvolvimento)`);
-      console.log(`\n📋 Endpoints disponíveis:`);
-      console.log(`   - GET  / (Informações da API)`);
-      console.log(`   - GET  /health (Health check)`);
-      console.log(`   - POST /api/auth/register`);
-      console.log(`   - POST /api/auth/login`);
-      console.log(`   - GET  /api/products`);
-      console.log(`   - POST /api/products\n`);
-    });
-  } catch (error) {
-    console.error('❌ Erro ao iniciar servidor:', error);
-    process.exit(1);
-  }
-};
-
-startServer();
