@@ -13,9 +13,6 @@ RUN npm ci --only=production
 # Copy source code
 COPY src ./src
 
-# Build TypeScript (ignore error if no tsconfig)
-RUN npx tsc || true
-
 # Production stage
 FROM node:20-alpine
 
@@ -32,10 +29,7 @@ RUN addgroup -g 1001 -S nodejs && \
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 
-# Copy built files (if exist)
-COPY --from=builder /app/dist ./dist* || true
-
-# Copy source code
+# Copy source code (running directly from TypeScript)
 COPY src ./src
 
 # Create logs directory
@@ -51,6 +45,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"
 
-# Start application
+# Start application with ts-node
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "src/index.ts"]
+CMD ["npm", "run", "dev"]
