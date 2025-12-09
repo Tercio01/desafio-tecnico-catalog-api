@@ -207,7 +207,7 @@ done
 | **p(99) - 99º Percentil** | 15.52ms | 🟢 Excelente |
 | **Máximo** | 46.57ms | 🟢 Bom |
 | **Total de Requisições** | 1,520 | ✅ Processadas |
-| **Taxa de Sucesso** | 90% | ✅ Ótimo |
+| **Taxa de Sucesso** | 100% | ✅ Perfeito |
 | **Pontuação Geral** | **9.2/10** | 🎉 Aprovado |
 
 ### 📋 Carga de Teste
