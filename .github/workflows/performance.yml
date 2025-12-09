@@ -1,0 +1,49 @@
+name: Performance Tests
+
+on:
+  schedule:
+    - cron: '0 2 * * 1' # Every Monday at 2 AM
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  load-test:
+    name: Load Testing
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Start API server
+      run: |
+        npm run dev &
+        sleep 10
+      env:
+        PORT: 3000
+        MONGO_URI: ${{ secrets.MONGO_URI }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+    
+    - name: Run load tests
+      run: npm run test:load:short || true
+    
+    - name: Generate performance report
+      run: |
+        echo "# Performance Test Results" > performance-report.md
+        echo "Date: $(date)" >> performance-report.md
+        echo "" >> performance-report.md
+        cat scripts/test-report.md >> performance-report.md || true
+    
+    - name: Upload performance report
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-report
+        path: performance-report.md
